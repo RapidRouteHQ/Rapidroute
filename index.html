@@ -31,9 +31,37 @@
 
         /* Result Card */
         .content-area { max-width: 800px; margin: -40px auto 40px; padding: 0 15px; position: relative; z-index: 10; }
-        .result-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .result-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); position: relative; overflow: hidden; }
+        
+        /* SEAL POSITIONED TO AVOID OVERLAP */
+        .official-seal { 
+            position: absolute; 
+            top: 5px; 
+            right: 5px; 
+            width: 65px; 
+            height: 65px; 
+            border: 1px dashed #e63946; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            font-size: 6px; 
+            font-weight: 900; 
+            color: #e63946; 
+            transform: rotate(15deg); 
+            opacity: 0.4; 
+            z-index: 1; /* Sits behind the status text */
+            pointer-events: none; 
+            text-transform: uppercase;
+        }
         .hidden { display: none !important; }
 
+        /* Header Info */
+        .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; position: relative; z-index: 5; }
+        .status-badge { background: #fff0f0; padding: 6px 12px; border-radius: 4px; color: #e63946; font-size: 12px; font-weight: bold; position: relative; z-index: 10; }
+
+        /* Airplane Animation */
         .map-line-container { position: relative; height: 60px; display: flex; justify-content: space-between; margin: 25px 0 40px; }
         .progress-line { position: absolute; top: 15px; width: 100%; height: 4px; background: #eee; z-index: 1; }
         .step { width: 30px; height: 30px; background: #e63946; border-radius: 50%; z-index: 2; position: relative; border: 4px solid white; }
@@ -44,7 +72,7 @@
         .info-block label { font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; }
         .info-block p { font-weight: bold; font-size: 14px; color: #333; }
 
-        /* History Timeline Styles */
+        /* History */
         .history-box { margin-top: 25px; border-top: 2px solid #f4f4f4; padding-top: 20px; }
         .history-title { font-size: 12px; font-weight: 900; color: #1a1a1a; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
         .timeline { position: relative; padding-left: 20px; border-left: 2px solid #eee; margin-left: 10px; }
@@ -55,12 +83,13 @@
         .log-msg { font-size: 13px; font-weight: bold; color: #333; margin: 2px 0; }
         .log-loc { font-size: 11px; color: #888; }
 
+        /* Buttons */
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-map { background: #333; color: white; flex: 1; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-print { background: #f4f4f4; color: #333; flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .whatsapp-pro { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: white; text-decoration: none; padding: 12px; border-radius: 4px; font-weight: bold; margin-top: 10px; }
+        .btn-map { background: #333; color: white; flex: 1; padding: 14px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .btn-print { background: #f4f4f4; color: #333; flex: 1; padding: 14px; border: 1px solid #ddd; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .whatsapp-pro { display: flex; align-items: center; justify-content: center; gap: 10px; background: #25D366; color: white; text-decoration: none; padding: 14px; border-radius: 4px; font-weight: bold; margin-top: 10px; }
 
-        /* Admin Portal Styles */
+        /* Admin */
         .admin-panel { background: white; margin: 20px; padding: 25px; border-radius: 8px; border: 2px solid #e63946; }
         .admin-panel input, .admin-panel select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         .admin-panel .row { display: flex; gap: 5px; margin-bottom: 10px; }
@@ -71,17 +100,21 @@
         .shipment-list { margin-top: 20px; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; }
         .shipment-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
 
-        /* Error Shake */
+        @media print {
+            nav, .hero-banner, .btn-group, .whatsapp-pro, footer, #adminPanel, .search-box { display: none !important; }
+            .content-area { margin: 0; padding: 0; width: 100%; }
+            .result-card { box-shadow: none; border: 1px solid #eee; }
+        }
+
         .shake { animation: shake 0.4s; border: 2px solid #e63946; }
         @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
-
         footer { text-align: center; padding: 40px; color: #aaa; font-size: 10px; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div onclick="showAdminLogin()" style="position: absolute; top: 0; left: 0; width: 80px; height: 80px; cursor: pointer; z-index: 10000; background: rgba(255, 255, 255, 0.01); -webkit-tap-highlight-color: transparent;"></div>
+        <div onclick="showAdminLogin()" style="position: absolute; top: 0; left: 0; width: 80px; height: 80px; cursor: pointer; z-index: 10000; background: rgba(255, 255, 255, 0.01);"></div>
         <div class="nav-container">
             <h1 class="logo">RAPID<span>ROUTE</span></h1>
             <div class="nav-links">GLOBAL EXPRESS</div>
@@ -92,7 +125,7 @@
         <div class="overlay">
             <h2>Track Your <span>Shipment</span></h2>
             <div class="search-box" id="searchWrapper">
-                <input type="text" id="trackingInput" placeholder="Enter Tracking # (e.g. RR-1001)">
+                <input type="text" id="trackingInput" placeholder="Enter Tracking #">
                 <button onclick="trackPackage()">TRACK</button>
             </div>
         </div>
@@ -100,9 +133,11 @@
 
     <div class="content-area">
         <div id="resultArea" class="result-card hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+            <div class="official-seal">RapidRoute<br>Verified<br>Logistics</div>
+            
+            <div class="card-top">
                 <span id="trackingIDDisplay" style="color:#e63946; font-weight:bold; font-size: 18px;"></span>
-                <span id="statusText" class="status-badge" style="background: #fff0f0; padding: 4px 10px; border-radius: 4px; color: #e63946; font-size: 12px; font-weight: bold;"></span>
+                <span id="statusText" class="status-badge"></span>
             </div>
 
             <div class="map-line-container">
@@ -124,13 +159,12 @@
 
             <div class="history-box">
                 <h4 class="history-title">Detailed Transit Log</h4>
-                <div class="timeline" id="historyTimeline">
-                    </div>
+                <div class="timeline" id="historyTimeline"></div>
             </div>
 
             <div class="btn-group">
-                <button onclick="openLiveMap()" class="btn-map"><i class="fa-solid fa-map-location-dot"></i> Live Route</button>
-                <button onclick="window.print()" class="btn-print"><i class="fa-solid fa-file-invoice"></i> Label</button>
+                <button onclick="openLiveMap()" class="btn-map">Live Route</button>
+                <button onclick="window.print()" class="btn-print">Label</button>
             </div>
 
             <a id="whatsappLink" href="#" target="_blank" class="whatsapp-pro">
@@ -140,59 +174,41 @@
     </div>
 
     <div id="adminPanel" class="admin-panel hidden">
-        <h3 style="margin-bottom: 15px; color:#e63946;">Staff Management Portal</h3>
-        
+        <h3 style="margin-bottom: 15px; color:#e63946;">Staff Management</h3>
         <div class="row">
             <input type="text" id="newID" placeholder="Tracking ID">
             <button onclick="generateID()" class="gen-btn">Auto-ID</button>
         </div>
-        
         <div class="row">
             <input type="text" id="newCityOrigin" placeholder="Origin City">
             <input type="text" id="newCountryOrigin" placeholder="Origin Country">
         </div>
-
         <div class="row">
             <input type="text" id="newCityDest" placeholder="Dest. City">
             <input type="text" id="newCountryDest" placeholder="Dest. Country">
         </div>
-
         <div class="row">
-            <input type="text" id="newType" placeholder="Content (e.g. Laptop)">
-            <input type="text" id="newWeight" placeholder="Weight (e.g. 2.5kg)">
+            <input type="text" id="newType" placeholder="Content">
+            <input type="text" id="newWeight" placeholder="Weight">
         </div>
-
-        <input type="text" id="clientPhone" placeholder="Client WhatsApp (e.g. 23480...)">
-        
+        <input type="text" id="clientPhone" placeholder="Client WhatsApp (234...)">
         <select id="newStatus">
             <option value="Pending">Pending</option>
             <option value="In Transit">In Transit</option>
             <option value="Clearance Delay">Clearance Delay</option>
             <option value="Delivered">Delivered</option>
         </select>
-        
         <button onclick="addPackage()">Save Shipment</button>
-        <button id="alertBtn" onclick="sendClientUpdate()" class="alert-btn hidden"><i class="fa-brands fa-whatsapp"></i> Send Update to Client</button>
-
-        <div class="shipment-list" id="shipmentList">
-            <strong style="display:block; margin-bottom: 10px;">Active Database:</strong>
-            <div id="listItems"></div>
-        </div>
+        <button id="alertBtn" onclick="sendClientUpdate()" class="alert-btn hidden">Send WhatsApp Update</button>
+        <div id="listItems"></div>
     </div>
 
-    <footer>© 2026 RapidRoute Logistics Intl. All Rights Reserved.</footer>
+    <footer>© 2026 RapidRoute Logistics Intl.</footer>
 
     <script>
-        // MASTER CONFIG
         const MASTER_PHONE = "2348000000000"; 
         const SITE_URL = "tinyurl.com/RapidRoute-Track"; 
-
         let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
-
-        function saveDB() {
-            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
-            renderShipmentList();
-        }
 
         function trackPackage() {
             const id = document.getElementById('trackingInput').value.trim().toUpperCase();
@@ -212,7 +228,6 @@
                 document.getElementById('trackingIDDisplay').innerText = "#" + id;
                 document.getElementById('resultArea').classList.remove('hidden');
                 
-                // History Rendering
                 const timeline = document.getElementById('historyTimeline');
                 timeline.innerHTML = "";
                 data.history.forEach((log, index) => {
@@ -222,11 +237,9 @@
                             <div class="log-date">${log.date} | ${log.time}</div>
                             <div class="log-msg">${log.msg}</div>
                             <div class="log-loc">${log.loc}</div>
-                        </div>
-                    `;
+                        </div>`;
                 });
 
-                // Plane Animation
                 plane.style.left = "0%";
                 destDot.style.background = "#e63946"; 
                 setTimeout(() => {
@@ -238,18 +251,14 @@
                         destDot.style.background = "#28a745";
                     }
                 }, 200);
-
                 document.getElementById('whatsappLink').href = `https://wa.me/${MASTER_PHONE}?text=Query Regarding ${id}`;
             } else { 
                 searchBox.classList.add('shake');
                 setTimeout(() => searchBox.classList.remove('shake'), 400);
-                alert("ID Not Found"); 
             }
         }
 
-        function generateID() {
-            document.getElementById('newID').value = "RR-" + Math.floor(1000 + Math.random() * 9000);
-        }
+        function generateID() { document.getElementById('newID').value = "RR-" + Math.floor(1000 + Math.random() * 9000); }
 
         function addPackage() {
             const id = document.getElementById('newID').value.trim().toUpperCase();
@@ -258,44 +267,37 @@
             const cityD = document.getElementById('newCityDest').value.trim();
             const countryD = document.getElementById('newCountryDest').value.trim();
             const status = document.getElementById('newStatus').value;
-            
             if (!id || !cityO || !cityD) return alert("Fill City and ID!");
 
-            // AUTO-GENERATING BACKDATED HISTORY
             const history = [
-                { date: "Mar 21, 2026", time: "09:45 AM", msg: `Current Status: ${status}`, loc: `${cityO}, ${countryO}` },
-                { date: "Feb 14, 2026", time: "11:20 AM", msg: "Departed Origin Sort Facility", loc: `${cityO} Distribution Center` },
-                { date: "Jan 28, 2026", time: "03:15 PM", msg: "Processed at Transit Hub", loc: `${countryO} Customs Port` },
-                { date: "Jan 12, 2026", time: "10:00 AM", msg: "Shipment Picked Up", loc: cityO },
-                { date: "Jan 10, 2026", time: "04:30 PM", msg: "Electronic Shipment Info Received", loc: "System Office" }
+                { date: "Mar 21, 2026", time: "09:45 AM", msg: `Status Update: ${status}`, loc: `${cityO}, ${countryO}` },
+                { date: "Feb 14, 2026", time: "11:20 AM", msg: "Cleared Customs Transit Hub", loc: `${cityO} Distribution Center` },
+                { date: "Jan 28, 2026", time: "03:15 PM", msg: "Arrived at Sort Facility", loc: `${countryO} Customs Port` },
+                { date: "Jan 12, 2026", time: "10:00 AM", msg: "Shipment Handed Over to Carrier", loc: cityO },
+                { date: "Jan 10, 2026", time: "04:30 PM", msg: "Order Processed", loc: "Logistics HQ" }
             ];
 
-            // If Clearance Delay, add the specific log
             if(status === "Clearance Delay") {
-                history.unshift({ date: "Mar 21, 2026", time: "12:00 PM", msg: "⚠️ Held by Customs: Inspection Required", loc: `${cityD} International Hub` });
+                history.unshift({ date: "Mar 21, 2026", time: "12:00 PM", msg: "⚠️ Held by Customs", loc: `${cityD} Hub` });
             }
 
             database[id] = {
-                status: status,
-                origin: `${cityO}, ${countryO}`,
-                destination: `${cityD}, ${countryD}`,
-                date: "7-12 Business Days",
-                type: document.getElementById('newType').value || "General Parcel",
+                status: status, origin: `${cityO}, ${countryO}`, destination: `${cityD}, ${countryD}`,
+                date: "7-12 Business Days", type: document.getElementById('newType').value || "Parcel",
                 weight: document.getElementById('newWeight').value || "N/A",
-                client: document.getElementById('clientPhone').value.trim(),
-                history: history
+                client: document.getElementById('clientPhone').value.trim(), history: history
             };
-
-            saveDB();
+            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
             document.getElementById('alertBtn').classList.remove('hidden');
-            alert("Shipment " + id + " Registered with Full History!");
+            renderShipmentList();
+            alert("Registered!");
         }
 
         function sendClientUpdate() {
             const id = document.getElementById('newID').value.toUpperCase();
             const data = database[id];
-            if(!data || !data.client) return alert("No client phone found!");
-            const msg = `🚀 *RapidRoute Logistics Update*%0A%0AHello! Your shipment *${id}* is now: *${data.status}*.%0A%0A📍 Current Loc: ${data.origin}%0A📦 Content: ${data.type}%0A%0AView Full Transit History Here:%0A👉 ${SITE_URL}`;
+            if(!data || !data.client) return;
+            const msg = `🚀 *RapidRoute Update*%0A%0AHello! Your shipment *${id}* is now: *${data.status}*.%0A%0A👉 ${SITE_URL}`;
             window.open(`https://wa.me/${data.client}?text=${msg}`, '_blank');
         }
 
@@ -303,7 +305,6 @@
             if (prompt("Staff Code:") === "FlawFlaw100$") {
                 document.getElementById('adminPanel').classList.remove('hidden');
                 renderShipmentList();
-                document.getElementById('adminPanel').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
@@ -318,9 +319,11 @@
         function openLiveMap() {
             const id = document.getElementById('trackingInput').value.trim().toUpperCase();
             if(database[id]) {
-                window.open(`https://www.google.com/maps/search/${encodeURIComponent(database[id].destination)}`, '_blank');
+                const dest = encodeURIComponent(database[id].destination);
+                window.open(`https://www.google.com/maps/search/${dest}`, '_blank');
             }
         }
     </script>
 </body>
-</html>
+        </html>
+                
