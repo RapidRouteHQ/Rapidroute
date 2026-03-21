@@ -29,7 +29,7 @@
         .search-box input { flex: 1; border: none; outline: none; padding: 12px; font-size: 16px; }
         .search-box button { background: #e63946; color: white; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; }
 
-        /* Result Card & Airplane Animation */
+        /* Result Card */
         .content-area { max-width: 800px; margin: -40px auto 40px; padding: 0 15px; position: relative; z-index: 10; }
         .result-card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
         .hidden { display: none !important; }
@@ -51,10 +51,11 @@
 
         /* Admin Portal Styles */
         .admin-panel { background: white; margin: 20px; padding: 25px; border-radius: 8px; border: 2px solid #e63946; }
-        .admin-panel input, .admin-panel select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        .admin-panel input, .admin-panel select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         .admin-panel .row { display: flex; gap: 5px; margin-bottom: 10px; }
         .admin-panel button { flex: 1; background: #1a1a1a; color: white; padding: 12px; border: none; border-radius: 4px; font-weight: bold; margin-bottom: 5px; cursor: pointer; }
         .gen-btn { background: #e63946 !important; }
+        .alert-btn { background: #25D366 !important; margin-top: 10px; }
         
         .shipment-list { margin-top: 20px; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; }
         .shipment-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
@@ -70,7 +71,6 @@
 
     <nav>
         <div onclick="showAdminLogin()" style="position: absolute; top: 0; left: 0; width: 80px; height: 80px; cursor: pointer; z-index: 10000; background: rgba(255, 255, 255, 0.01); -webkit-tap-highlight-color: transparent;"></div>
-        
         <div class="nav-container">
             <h1 class="logo">RAPID<span>ROUTE</span></h1>
             <div class="nav-links">GLOBAL EXPRESS</div>
@@ -141,9 +141,11 @@
         </div>
 
         <div class="row">
-            <input type="text" id="newType" placeholder="Parcel Content (e.g. Electronics)">
-            <input type="text" id="newWeight" placeholder="Weight (e.g. 10kg)">
+            <input type="text" id="newType" placeholder="Content (e.g. Laptop)">
+            <input type="text" id="newWeight" placeholder="Weight (e.g. 2.5kg)">
         </div>
+
+        <input type="text" id="clientPhone" placeholder="Client WhatsApp (e.g. 23480...)">
         
         <select id="newStatus">
             <option value="Pending">Pending</option>
@@ -153,6 +155,7 @@
         </select>
         
         <button onclick="addPackage()">Save Shipment</button>
+        <button id="alertBtn" onclick="sendClientUpdate()" class="alert-btn hidden"><i class="fa-brands fa-whatsapp"></i> Send Update to Client</button>
 
         <div class="shipment-list" id="shipmentList">
             <strong style="display:block; margin-bottom: 10px;">Active Database:</strong>
@@ -163,9 +166,12 @@
     <footer>© 2026 RapidRoute Logistics Intl. All Rights Reserved.</footer>
 
     <script>
-        // 1. Database Initializer
+        // YOUR Master Info
+        const MASTER_PHONE = "2348000000000"; // Support number
+        const SITE_URL = "tinyurl.com/RapidRoute-Track"; // YOUR LINK HERE
+
         let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {
-            "ROUTE777": { status: "In Transit", origin: "London, UK", destination: "Tokyo, Japan", date: "April 02, 2026", type: "Documents", weight: "0.5kg", booked: "March 21, 2026" }
+            "ROUTE777": { status: "In Transit", origin: "London, UK", destination: "Tokyo, JP", date: "April 02, 2026", type: "Docs", weight: "0.5kg", booked: "Mar 21, 2026", client: "" }
         };
 
         function saveDB() {
@@ -173,7 +179,6 @@
             renderShipmentList();
         }
 
-        // 2. Tracking Logic
         function trackPackage() {
             const id = document.getElementById('trackingInput').value.trim().toUpperCase();
             const data = database[id];
@@ -186,7 +191,7 @@
                 document.getElementById('originDisplay').innerText = data.origin;
                 document.getElementById('destDisplay').innerText = data.destination;
                 document.getElementById('dateText').innerText = data.date;
-                document.getElementById('typeDisplay').innerText = data.type || "General Parcel";
+                document.getElementById('typeDisplay').innerText = data.type || "Parcel";
                 document.getElementById('weightDisplay').innerText = data.weight || "N/A";
                 document.getElementById('bookingDisplay').innerText = data.booked || "Processing";
                 document.getElementById('trackingIDDisplay').innerText = "#" + id;
@@ -205,7 +210,7 @@
                     }
                 }, 200);
 
-                document.getElementById('whatsappLink').href = `https://wa.me/2348000000000?text=Shipment ${id} Support`;
+                document.getElementById('whatsappLink').href = `https://wa.me/${MASTER_PHONE}?text=Query Regarding ${id}`;
             } else { 
                 searchBox.classList.add('shake');
                 setTimeout(() => searchBox.classList.remove('shake'), 400);
@@ -213,7 +218,6 @@
             }
         }
 
-        // 3. Admin Functions
         function generateID() {
             document.getElementById('newID').value = "RR-" + Math.floor(1000 + Math.random() * 9000);
         }
@@ -221,32 +225,32 @@
         function addPackage() {
             const id = document.getElementById('newID').value.trim().toUpperCase();
             const cityO = document.getElementById('newCityOrigin').value.trim();
-            const countryO = document.getElementById('newCountryOrigin').value.trim();
             const cityD = document.getElementById('newCityDest').value.trim();
-            const countryD = document.getElementById('newCountryDest').value.trim();
-            const type = document.getElementById('newType').value.trim();
-            const weight = document.getElementById('newWeight').value.trim();
             
-            if (!id || !cityO || !cityD) return alert("Please fill city and ID fields!");
+            if (!id || !cityO || !cityD) return alert("Fill City and ID!");
             
             database[id] = {
                 status: document.getElementById('newStatus').value,
-                origin: `${cityO}, ${countryO}`,
-                destination: `${cityD}, ${countryD}`,
+                origin: `${cityO}, ${document.getElementById('newCountryOrigin').value}`,
+                destination: `${cityD}, ${document.getElementById('newCountryDest').value}`,
                 date: "7-12 Business Days",
-                type: type || "General Goods",
-                weight: weight || "N/A",
-                booked: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                type: document.getElementById('newType').value,
+                weight: document.getElementById('newWeight').value,
+                client: document.getElementById('clientPhone').value.trim(),
+                booked: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
             };
             saveDB();
+            document.getElementById('alertBtn').classList.remove('hidden');
             alert("Shipment Registered!");
-            document.getElementById('newID').value = "";
-            document.getElementById('newCityOrigin').value = "";
-            document.getElementById('newCountryOrigin').value = "";
-            document.getElementById('newCityDest').value = "";
-            document.getElementById('newCountryDest').value = "";
-            document.getElementById('newType').value = "";
-            document.getElementById('newWeight').value = "";
+        }
+
+        function sendClientUpdate() {
+            const id = document.getElementById('newID').value.toUpperCase();
+            const data = database[id];
+            if(!data || !data.client) return alert("No client phone found!");
+            
+            const msg = `🚀 *RapidRoute Logistics Update*%0A%0AHello! Your shipment *${id}* is now: *${data.status}*.%0A%0A📍 Origin: ${data.origin}%0A📦 Content: ${data.type}%0A%0AView Live Tracking Here:%0A👉 ${SITE_URL}`;
+            window.open(`https://wa.me/${data.client}?text=${msg}`, '_blank');
         }
 
         function showAdminLogin() {
@@ -268,8 +272,7 @@
         function openLiveMap() {
             const id = document.getElementById('trackingInput').value.trim().toUpperCase();
             if(database[id]) {
-                const url = `https://www.google.com/maps/dir/${encodeURIComponent(database[id].origin)}/${encodeURIComponent(database[id].destination)}`;
-                window.open(url, '_blank');
+                window.open(`https://www.google.com/maps/search/${encodeURIComponent(database[id].destination)}`, '_blank');
             }
         }
     </script>
