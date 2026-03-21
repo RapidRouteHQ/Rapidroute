@@ -25,7 +25,7 @@
         .overlay { background: rgba(0,0,0,0.6); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 0 20px; }
         .hero-banner h2 { font-size: 1.6rem; margin-bottom: 20px; }
         .hero-banner h2 span { color: #e63946; }
-        .search-box { display: flex; background: white; border-radius: 4px; overflow: hidden; padding: 5px; width: 100%; max-width: 500px; }
+        .search-box { display: flex; background: white; border-radius: 4px; overflow: hidden; padding: 5px; width: 100%; max-width: 500px; transition: 0.3s; }
         .search-box input { flex: 1; border: none; outline: none; padding: 12px; font-size: 16px; }
         .search-box button { background: #e63946; color: white; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; }
 
@@ -59,6 +59,10 @@
         .shipment-list { margin-top: 20px; font-size: 12px; border-top: 1px solid #eee; padding-top: 15px; }
         .shipment-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f9f9f9; }
 
+        /* Error Shake */
+        .shake { animation: shake 0.4s; border: 2px solid #e63946; }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-10px);} 75% {transform: translateX(10px);} }
+
         footer { text-align: center; padding: 40px; color: #aaa; font-size: 10px; }
     </style>
 </head>
@@ -76,7 +80,7 @@
     <header class="hero-banner">
         <div class="overlay">
             <h2>Track Your <span>Shipment</span></h2>
-            <div class="search-box">
+            <div class="search-box" id="searchWrapper">
                 <input type="text" id="trackingInput" placeholder="Enter Tracking # (e.g. RR-1001)">
                 <button onclick="trackPackage()">TRACK</button>
             </div>
@@ -87,7 +91,7 @@
         <div id="resultArea" class="result-card hidden">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
                 <span id="trackingIDDisplay" style="color:#e63946; font-weight:bold; font-size: 18px;"></span>
-                <span id="statusText" class="status-badge"></span>
+                <span id="statusText" class="status-badge" style="background: #fff0f0; padding: 4px 10px; border-radius: 4px; color: #e63946; font-size: 12px; font-weight: bold;"></span>
             </div>
 
             <div class="map-line-container">
@@ -102,6 +106,9 @@
                 <div class="info-block"><label>ORIGIN</label><p id="originDisplay"></p></div>
                 <div class="info-block"><label>DESTINATION</label><p id="destDisplay"></p></div>
                 <div class="info-block"><label>EST. DELIVERY</label><p id="dateText"></p></div>
+                <div class="info-block"><label>PARCEL CONTENT</label><p id="typeDisplay"></p></div>
+                <div class="info-block"><label>WEIGHT</label><p id="weightDisplay"></p></div>
+                <div class="info-block"><label>BOOKING DATE</label><p id="bookingDisplay"></p></div>
             </div>
 
             <div class="btn-group">
@@ -132,6 +139,11 @@
             <input type="text" id="newCityDest" placeholder="Dest. City">
             <input type="text" id="newCountryDest" placeholder="Dest. Country">
         </div>
+
+        <div class="row">
+            <input type="text" id="newType" placeholder="Parcel Content (e.g. Electronics)">
+            <input type="text" id="newWeight" placeholder="Weight (e.g. 10kg)">
+        </div>
         
         <select id="newStatus">
             <option value="Pending">Pending</option>
@@ -153,7 +165,7 @@
     <script>
         // 1. Database Initializer
         let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {
-            "ROUTE777": { status: "In Transit", origin: "London, UK", destination: "Tokyo, Japan", date: "April 02, 2026" }
+            "ROUTE777": { status: "In Transit", origin: "London, UK", destination: "Tokyo, Japan", date: "April 02, 2026", type: "Documents", weight: "0.5kg", booked: "March 21, 2026" }
         };
 
         function saveDB() {
@@ -167,12 +179,16 @@
             const data = database[id];
             const plane = document.getElementById('plane');
             const destDot = document.getElementById('dot-dest');
+            const searchBox = document.getElementById('searchWrapper');
 
             if (data) {
                 document.getElementById('statusText').innerText = data.status;
                 document.getElementById('originDisplay').innerText = data.origin;
                 document.getElementById('destDisplay').innerText = data.destination;
                 document.getElementById('dateText').innerText = data.date;
+                document.getElementById('typeDisplay').innerText = data.type || "General Parcel";
+                document.getElementById('weightDisplay').innerText = data.weight || "N/A";
+                document.getElementById('bookingDisplay').innerText = data.booked || "Processing";
                 document.getElementById('trackingIDDisplay').innerText = "#" + id;
                 document.getElementById('resultArea').classList.remove('hidden');
                 
@@ -182,7 +198,7 @@
                 setTimeout(() => {
                     if (data.status === "Pending") plane.style.left = "5%";
                     else if (data.status === "In Transit") plane.style.left = "45%";
-                    else if (data.status === "Clearance Delay") plane.style.left = "65%"; // Stays between transit and arrival
+                    else if (data.status === "Clearance Delay") plane.style.left = "65%";
                     else if (data.status === "Delivered") {
                         plane.style.left = "90%";
                         destDot.style.background = "#28a745";
@@ -190,7 +206,11 @@
                 }, 200);
 
                 document.getElementById('whatsappLink').href = `https://wa.me/2348000000000?text=Shipment ${id} Support`;
-            } else { alert("ID Not Found"); }
+            } else { 
+                searchBox.classList.add('shake');
+                setTimeout(() => searchBox.classList.remove('shake'), 400);
+                alert("ID Not Found"); 
+            }
         }
 
         // 3. Admin Functions
@@ -204,6 +224,8 @@
             const countryO = document.getElementById('newCountryOrigin').value.trim();
             const cityD = document.getElementById('newCityDest').value.trim();
             const countryD = document.getElementById('newCountryDest').value.trim();
+            const type = document.getElementById('newType').value.trim();
+            const weight = document.getElementById('newWeight').value.trim();
             
             if (!id || !cityO || !cityD) return alert("Please fill city and ID fields!");
             
@@ -211,7 +233,10 @@
                 status: document.getElementById('newStatus').value,
                 origin: `${cityO}, ${countryO}`,
                 destination: `${cityD}, ${countryD}`,
-                date: "7-12 Business Days"
+                date: "7-12 Business Days",
+                type: type || "General Goods",
+                weight: weight || "N/A",
+                booked: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
             };
             saveDB();
             alert("Shipment Registered!");
@@ -220,6 +245,8 @@
             document.getElementById('newCountryOrigin').value = "";
             document.getElementById('newCityDest').value = "";
             document.getElementById('newCountryDest').value = "";
+            document.getElementById('newType').value = "";
+            document.getElementById('newWeight').value = "";
         }
 
         function showAdminLogin() {
@@ -248,4 +275,3 @@
     </script>
 </body>
 </html>
-                
