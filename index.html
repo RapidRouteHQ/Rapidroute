@@ -44,6 +44,17 @@
         .info-block label { font-size: 9px; color: #999; font-weight: bold; text-transform: uppercase; }
         .info-block p { font-weight: bold; font-size: 14px; color: #333; }
 
+        /* History Timeline Styles */
+        .history-box { margin-top: 25px; border-top: 2px solid #f4f4f4; padding-top: 20px; }
+        .history-title { font-size: 12px; font-weight: 900; color: #1a1a1a; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .timeline { position: relative; padding-left: 20px; border-left: 2px solid #eee; margin-left: 10px; }
+        .log-item { position: relative; margin-bottom: 20px; padding-left: 15px; }
+        .log-item::before { content: ""; position: absolute; left: -27px; top: 5px; width: 12px; height: 12px; background: white; border: 3px solid #ddd; border-radius: 50%; }
+        .log-item.latest::before { border-color: #e63946; background: #e63946; }
+        .log-date { font-size: 10px; color: #e63946; font-weight: bold; }
+        .log-msg { font-size: 13px; font-weight: bold; color: #333; margin: 2px 0; }
+        .log-loc { font-size: 11px; color: #888; }
+
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
         .btn-map { background: #333; color: white; flex: 1; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .btn-print { background: #f4f4f4; color: #333; flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-weight: bold; cursor: pointer; }
@@ -111,6 +122,12 @@
                 <div class="info-block"><label>BOOKING DATE</label><p id="bookingDisplay"></p></div>
             </div>
 
+            <div class="history-box">
+                <h4 class="history-title">Detailed Transit Log</h4>
+                <div class="timeline" id="historyTimeline">
+                    </div>
+            </div>
+
             <div class="btn-group">
                 <button onclick="openLiveMap()" class="btn-map"><i class="fa-solid fa-map-location-dot"></i> Live Route</button>
                 <button onclick="window.print()" class="btn-print"><i class="fa-solid fa-file-invoice"></i> Label</button>
@@ -166,13 +183,11 @@
     <footer>© 2026 RapidRoute Logistics Intl. All Rights Reserved.</footer>
 
     <script>
-        // YOUR Master Info
-        const MASTER_PHONE = "2348000000000"; // Support number
-        const SITE_URL = "tinyurl.com/RapidRoute-Track"; // YOUR LINK HERE
+        // MASTER CONFIG
+        const MASTER_PHONE = "2348000000000"; 
+        const SITE_URL = "tinyurl.com/RapidRoute-Track"; 
 
-        let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {
-            "ROUTE777": { status: "In Transit", origin: "London, UK", destination: "Tokyo, JP", date: "April 02, 2026", type: "Docs", weight: "0.5kg", booked: "Mar 21, 2026", client: "" }
-        };
+        let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
 
         function saveDB() {
             localStorage.setItem('rapidRouteDB', JSON.stringify(database));
@@ -193,13 +208,27 @@
                 document.getElementById('dateText').innerText = data.date;
                 document.getElementById('typeDisplay').innerText = data.type || "Parcel";
                 document.getElementById('weightDisplay').innerText = data.weight || "N/A";
-                document.getElementById('bookingDisplay').innerText = data.booked || "Processing";
+                document.getElementById('bookingDisplay').innerText = data.history[data.history.length-1].date;
                 document.getElementById('trackingIDDisplay').innerText = "#" + id;
                 document.getElementById('resultArea').classList.remove('hidden');
                 
+                // History Rendering
+                const timeline = document.getElementById('historyTimeline');
+                timeline.innerHTML = "";
+                data.history.forEach((log, index) => {
+                    const isLatest = index === 0;
+                    timeline.innerHTML += `
+                        <div class="log-item ${isLatest ? 'latest' : ''}">
+                            <div class="log-date">${log.date} | ${log.time}</div>
+                            <div class="log-msg">${log.msg}</div>
+                            <div class="log-loc">${log.loc}</div>
+                        </div>
+                    `;
+                });
+
+                // Plane Animation
                 plane.style.left = "0%";
                 destDot.style.background = "#e63946"; 
-                
                 setTimeout(() => {
                     if (data.status === "Pending") plane.style.left = "5%";
                     else if (data.status === "In Transit") plane.style.left = "45%";
@@ -225,31 +254,48 @@
         function addPackage() {
             const id = document.getElementById('newID').value.trim().toUpperCase();
             const cityO = document.getElementById('newCityOrigin').value.trim();
+            const countryO = document.getElementById('newCountryOrigin').value.trim();
             const cityD = document.getElementById('newCityDest').value.trim();
+            const countryD = document.getElementById('newCountryDest').value.trim();
+            const status = document.getElementById('newStatus').value;
             
             if (!id || !cityO || !cityD) return alert("Fill City and ID!");
-            
+
+            // AUTO-GENERATING BACKDATED HISTORY
+            const history = [
+                { date: "Mar 21, 2026", time: "09:45 AM", msg: `Current Status: ${status}`, loc: `${cityO}, ${countryO}` },
+                { date: "Feb 14, 2026", time: "11:20 AM", msg: "Departed Origin Sort Facility", loc: `${cityO} Distribution Center` },
+                { date: "Jan 28, 2026", time: "03:15 PM", msg: "Processed at Transit Hub", loc: `${countryO} Customs Port` },
+                { date: "Jan 12, 2026", time: "10:00 AM", msg: "Shipment Picked Up", loc: cityO },
+                { date: "Jan 10, 2026", time: "04:30 PM", msg: "Electronic Shipment Info Received", loc: "System Office" }
+            ];
+
+            // If Clearance Delay, add the specific log
+            if(status === "Clearance Delay") {
+                history.unshift({ date: "Mar 21, 2026", time: "12:00 PM", msg: "⚠️ Held by Customs: Inspection Required", loc: `${cityD} International Hub` });
+            }
+
             database[id] = {
-                status: document.getElementById('newStatus').value,
-                origin: `${cityO}, ${document.getElementById('newCountryOrigin').value}`,
-                destination: `${cityD}, ${document.getElementById('newCountryDest').value}`,
+                status: status,
+                origin: `${cityO}, ${countryO}`,
+                destination: `${cityD}, ${countryD}`,
                 date: "7-12 Business Days",
-                type: document.getElementById('newType').value,
-                weight: document.getElementById('newWeight').value,
+                type: document.getElementById('newType').value || "General Parcel",
+                weight: document.getElementById('newWeight').value || "N/A",
                 client: document.getElementById('clientPhone').value.trim(),
-                booked: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                history: history
             };
+
             saveDB();
             document.getElementById('alertBtn').classList.remove('hidden');
-            alert("Shipment Registered!");
+            alert("Shipment " + id + " Registered with Full History!");
         }
 
         function sendClientUpdate() {
             const id = document.getElementById('newID').value.toUpperCase();
             const data = database[id];
             if(!data || !data.client) return alert("No client phone found!");
-            
-            const msg = `🚀 *RapidRoute Logistics Update*%0A%0AHello! Your shipment *${id}* is now: *${data.status}*.%0A%0A📍 Origin: ${data.origin}%0A📦 Content: ${data.type}%0A%0AView Live Tracking Here:%0A👉 ${SITE_URL}`;
+            const msg = `🚀 *RapidRoute Logistics Update*%0A%0AHello! Your shipment *${id}* is now: *${data.status}*.%0A%0A📍 Current Loc: ${data.origin}%0A📦 Content: ${data.type}%0A%0AView Full Transit History Here:%0A👉 ${SITE_URL}`;
             window.open(`https://wa.me/${data.client}?text=${msg}`, '_blank');
         }
 
@@ -277,4 +323,4 @@
         }
     </script>
 </body>
-</html
+</html>
