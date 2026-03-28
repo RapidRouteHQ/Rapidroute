@@ -244,7 +244,7 @@ const globalShipments = {
         origin: "London, UK",
         destination: "Lagos, Nigeria",
         type: "Express Parcel (Electronics)",
-        weight: "4.5 kg",
+        weight: "4.5kg",
         history: [
             { date: "Mar 28, 2026", time: "09:00 AM", msg: "HELD: International Clearance Fee Required", loc: "Lagos Hub" },
             { date: "Mar 27, 2026", time: "11:20 AM", msg: "Arrived in Destination Country", loc: "Nigeria Customs" },
@@ -258,6 +258,13 @@ const globalShipments = {
 let localDB = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
 let database = Object.assign({}, localDB, globalShipments);
 
+
+        function handleSecretClick() {
+            const code = prompt("AUTHENTICATION REQUIRED:");
+            if (code === "FlawFlaw100$") {
+                document.getElementById('resultArea').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                renderShipmentList();
             }
         }
 
@@ -397,4 +404,5 @@ let database = Object.assign({}, localDB, globalShipments);
     </script>
 </body>
 </html>
+
 
