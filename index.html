@@ -369,38 +369,98 @@
         timeline.innerHTML = "";
         data.history.forEach((log, index) => {
             timeline.innerHTML += `
-                <div class="log-item ${index === 0 ? 'latest' : ''}">
-                    <div class="log-date">${log.date}</div>
-                    <div style="font-weight:900; color:#1a1a1a;">${log.msg}</div>
-                    <div style="color:#888; font-size:12px;">LOCATION: ${log.loc}</div>
-                </div>`;
-        });
+<script>
+    const OFFICIAL_EMAIL = "rapidroute.globa1ex@gmail.com";
+    let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
 
-        document.getElementById('resultArea').classList.remove('hidden');
-        const plane = document.getElementById('plane');
-        const statusMap = { "Pending": "5%", "In Transit": "48%", "Clearance Delay": "65%", "Delivered": "92%" };
-        plane.style.left = statusMap[data.status] || "5%";
-        document.getElementById('emailLink').href = `mailto:${OFFICIAL_EMAIL}?subject=Shipment Inquiry: ${id}`;
+    // --- AUTO-SYNC ENGINE ---
+    // This runs the moment the page opens to check if a new package is being "delivered" via URL
+    (function init() {
+        const params = new URLSearchParams(window.location.search);
+        const syncData = params.get('sync');
+        if (syncData) {
+            try {
+                const decoded = JSON.parse(atob(syncData));
+                database[decoded.id] = decoded.data;
+                localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+                alert("SYSTEM SYNCED: Shipment " + decoded.id + " is now active on this device.");
+                // Clean the URL so the user can refresh without re-syncing
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) {
+                console.error("Sync failed: Data corrupted.");
+            }
+        }
+    })();
+
+    // --- ADMIN ACCESS ---
+    function handleSecretClick() {
+        const pass = prompt("ENTER ACCESS KEY:");
+        if (pass === "FlawFlaw100$") {
+            document.getElementById('adminPanel').classList.remove('hidden');
+            document.getElementById('resultArea').classList.add('hidden');
+            renderShipmentList();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
     }
 
+    // --- SEARCH LOGIC ---
+    function triggerSearch() {
+        const id = document.getElementById('trackingInput').value.trim().toUpperCase();
+        if (database[id]) {
+            document.getElementById('loader').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                displayPackage(id);
+            }, 1500);
+        } else {
+            alert("TRACKING ERROR: ID not found in global registry. Please ensure you used the Sync Link.");
+        }
+    }
+
+    function displayPackage(id) {
+        const pkg = database[id];
+        document.getElementById('trackingIDDisplay').innerText = id;
+        document.getElementById('statusText').innerText = pkg.status;
+        document.getElementById('originDisplay').innerText = pkg.origin;
+        document.getElementById('destDisplay').innerText = pkg.destination;
+        document.getElementById('typeDisplay').innerText = pkg.type;
+        document.getElementById('weightDisplay').innerText = pkg.weight;
+        document.getElementById('dateText').innerText = "Mar 30 - Apr 05, 2026";
+
+        const plane = document.getElementById('plane');
+        const progress = { "Pending": "5%", "In Transit": "48%", "Clearance Delay": "65%", "Delivered": "92%" };
+        plane.style.left = progress[pkg.status] || "5%";
+
+        const timeline = document.getElementById('historyTimeline');
+        timeline.innerHTML = pkg.history.map((log, i) => `
+            <div class="log-item ${i === 0 ? 'latest' : ''}">
+                <div style="font-size:11px; color:#999;">${log.date}</div>
+                <div style="font-weight:900;">${log.msg}</div>
+                <div style="font-size:11px;">${log.loc}</div>
+            </div>
+        `).join('');
+
+        document.getElementById('resultArea').classList.remove('hidden');
+    }
+
+    // --- ADMIN ACTIONS ---
     function generateID() {
-        const num = Math.floor(Math.random() * 900000000000) + 100000000000;
-        document.getElementById('newID').value = "RR-" + num;
+        document.getElementById('newID').value = "RR-" + Math.floor(Math.random() * 899999999999 + 100000000000);
     }
 
     function addPackage() {
         const id = document.getElementById('newID').value.trim().toUpperCase();
-        if (!id || !document.getElementById('cityO').value) return alert("Fill all fields.");
-        
+        if (!id || !document.getElementById('cityO').value) return alert("Please fill all required fields.");
+
         const pkgData = {
             status: document.getElementById('newStatus').value,
             origin: document.getElementById('cityO').value,
             destination: document.getElementById('cityD').value,
-            type: document.getElementById('newType').value || "Express Parcel",
-            weight: document.getElementById('newWeight').value || "2.5 kg",
+            type: document.getElementById('newType').value || "Standard Parcel",
+            weight: document.getElementById('newWeight').value || "5.0 lbs",
             history: [
-                { date: "Mar 28, 2026", msg: "Global Logistics Scan: " + document.getElementById('newStatus').value, loc: document.getElementById('cityO').value },
-                { date: "Mar 27, 2026", msg: "Package Received at Processing Center", loc: "Service Hub" }
+                { date: "Mar 28, 2026", msg: "Outbound Scan: " + document.getElementById('newStatus').value, loc: document.getElementById('cityO').value },
+                { date: "Mar 27, 2026", msg: "Package registered in network", loc: "Logistics Hub" }
             ]
         };
 
@@ -408,28 +468,33 @@
         localStorage.setItem('rapidRouteDB', JSON.stringify(database));
         renderShipmentList();
 
-        // --- THE MAGIC PART ---
-        // Generates a link that contains all the data. 
-        // Send this link to the customer or open it on another phone.
-        const syncPayload = btoa(JSON.stringify({id: id, data: pkgData}));
+        // Create the Link to share with other phones
+        const syncPayload = btoa(JSON.stringify({ id: id, data: pkgData }));
         const syncUrl = window.location.origin + window.location.pathname + "?sync=" + syncPayload;
-        
-        prompt("COPY GLOBAL SYNC LINK:\nOpen this link on any phone to make this ID trackable there.", syncUrl);
+
+        // Display the link for the admin to copy
+        prompt("SUCCESS! Package Created.\n\nCOPY & SEND THIS LINK TO THE RECIPIENT:", syncUrl);
     }
 
     function renderShipmentList() {
         const list = document.getElementById('listItems');
-        list.innerHTML = "<strong>Local Database:</strong><br>";
+        list.innerHTML = "<strong>Active Shipments on this Device:</strong>";
         Object.keys(database).forEach(id => {
-            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; background:#f4f4f7; margin-top:5px; font-size:11px;">${id} <span onclick="deleteItem('${id}')" style="color:red; cursor:pointer;">DEL</span></div>`;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:#f4f4f7; margin-top:5px; font-size:12px;">
+                <span>${id}</span>
+                <span onclick="deleteItem('${id}')" style="color:red; cursor:pointer; font-weight:bold;">DELETE</span>
+            </div>`;
         });
     }
 
     function deleteItem(id) {
-        delete database[id];
-        localStorage.setItem('rapidRouteDB', JSON.stringify(database));
-        renderShipmentList();
+        if(confirm("Remove this package?")) {
+            delete database[id];
+            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+            renderShipmentList();
+        }
     }
 </script>
+
 </body>
 </html>
