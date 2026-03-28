@@ -310,81 +310,126 @@
             try {
                 const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}`);
                 const result = await response.json();
-                return result.length > 0 ? [parseFloat(result[0].lat), parseFloat(result[0].lon)] : null;
-            } catch (e) { return null; }
+<script>
+    // --- GLOBAL SYNC ENGINE ---
+    const OFFICIAL_EMAIL = "rapidroute.globa1ex@gmail.com";
+    let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
+    let mapInstance = null;
+
+    // This runs as soon as the page loads on ANY phone
+    (function checkSync() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const syncData = urlParams.get('sync');
+        if (syncData) {
+            try {
+                // Decodes the package data hidden in the URL
+                const decoded = JSON.parse(atob(syncData));
+                database[decoded.id] = decoded.data;
+                // Saves it to this phone's memory forever
+                localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+                alert("DATABASE SYNCED: Package " + decoded.id + " is now trackable on this device.");
+                // Cleans the URL so the link stays professional
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) { console.error("Sync Error"); }
         }
+    })();
 
-        async function openLiveMap() {
-            const id = document.getElementById('trackingIDDisplay').innerText;
-            const pkg = database[id];
-            if(!pkg) return;
-            document.getElementById('mapOverlay').style.display = 'flex';
-            if(mapInstance) mapInstance.remove();
-            mapInstance = L.map('liveMap').setView([20, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
-            const startCoords = await getCityCoords(pkg.origin);
-            const endCoords = await getCityCoords(pkg.destination);
-            if(startCoords && endCoords) {
-                L.marker(startCoords).addTo(mapInstance).bindPopup("Origin");
-                L.marker(endCoords).addTo(mapInstance).bindPopup("Origin");
-                L.marker(endCoords).addTo(mapInstance).bindPopup("Destination");
-                const track = L.polyline([startCoords, endCoords], {color: '#e63946', weight: 3, dashArray: '10, 10'}).addTo(mapInstance);
-                mapInstance.fitBounds(track.getBounds(), {padding: [50, 50]});
-            }
-        }
-
-        function closeLiveMap() { document.getElementById('mapOverlay').style.display = 'none'; }
-
-        function generateID() {
-            const numbers = Math.floor(Math.random() * 900000000000) + 100000000000;
-            document.getElementById('newID').value = "RR-" + numbers;
-        }
-
-        function addPackage() {
-            const id = document.getElementById('newID').value.trim().toUpperCase();
-            const status = document.getElementById('newStatus').value;
-            const origin = document.getElementById('cityO').value;
-            const dest = document.getElementById('cityD').value;
-
-            if (!id || !origin) return alert("Missing details.");
-            
-            const pkgData = {
-                status: status,
-                origin: origin,
-                destination: dest,
-                type: document.getElementById('newType').value || "Express Parcel",
-                weight: document.getElementById('newWeight').value || "2.5 kg",
-                history: [
-                    { date: "Mar 28, 2026", time: "11:20 AM", msg: "Global Logistics Outbound Scan: " + status, loc: origin },
-                    { date: "Mar 27, 2026", time: "09:45 AM", msg: "Manifest Picked Up", loc: "Service Hub" }
-                ]
-            };
-
-            database[id] = pkgData;
-            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
-            renderShipmentList();
-
-            // Create Sync URL
-            const syncPayload = btoa(JSON.stringify({id: id, data: pkgData}));
-            const syncUrl = window.location.origin + window.location.pathname + "?sync=" + syncPayload;
-            
-            prompt("COPY THIS SYNC LINK: Open this link on any OTHER phone to make this package trackable there instantly.", syncUrl);
-            alert("Package Saved Locally.");
-        }
-
-        function renderShipmentList() {
-            const list = document.getElementById('listItems');
-            list.innerHTML = "<strong>Authorized Local Database:</strong><br>";
-            Object.keys(database).forEach(id => {
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:#f4f4f7; margin-top:5px; font-size:12px;"><span>${id}</span><span onclick="deleteItem('${id}')" style="color:red; cursor:pointer;">DELETE</span></div>`;
-            });
-        }
-
-        function deleteItem(id) {
-            delete database[id];
-            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+    function handleSecretClick() {
+        const code = prompt("AUTHENTICATION REQUIRED:");
+        if (code === "FlawFlaw100$") {
+            document.getElementById('resultArea').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
             renderShipmentList();
         }
-    </script>
+    }
+
+    function triggerSearch() {
+        const id = document.getElementById('trackingInput').value.trim().toUpperCase();
+        if (database[id]) {
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('loader').style.display = 'flex';
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                trackPackage(id);
+            }, 1800);
+        } else { alert("Error: Tracking Number not found in Global Records."); }
+    }
+
+    function trackPackage(id) {
+        const data = database[id];
+        document.getElementById('statusText').innerText = data.status;
+        document.getElementById('originDisplay').innerText = data.origin;
+        document.getElementById('destDisplay').innerText = data.destination;
+        document.getElementById('trackingIDDisplay').innerText = id;
+        document.getElementById('typeDisplay').innerText = data.type;
+        document.getElementById('weightDisplay').innerText = data.weight;
+        document.getElementById('dateText').innerText = "Mar 30 - Apr 08, 2026";
+
+        const timeline = document.getElementById('historyTimeline');
+        timeline.innerHTML = "";
+        data.history.forEach((log, index) => {
+            timeline.innerHTML += `
+                <div class="log-item ${index === 0 ? 'latest' : ''}">
+                    <div class="log-date">${log.date}</div>
+                    <div style="font-weight:900; color:#1a1a1a;">${log.msg}</div>
+                    <div style="color:#888; font-size:12px;">LOCATION: ${log.loc}</div>
+                </div>`;
+        });
+
+        document.getElementById('resultArea').classList.remove('hidden');
+        const plane = document.getElementById('plane');
+        const statusMap = { "Pending": "5%", "In Transit": "48%", "Clearance Delay": "65%", "Delivered": "92%" };
+        plane.style.left = statusMap[data.status] || "5%";
+        document.getElementById('emailLink').href = `mailto:${OFFICIAL_EMAIL}?subject=Shipment Inquiry: ${id}`;
+    }
+
+    function generateID() {
+        const num = Math.floor(Math.random() * 900000000000) + 100000000000;
+        document.getElementById('newID').value = "RR-" + num;
+    }
+
+    function addPackage() {
+        const id = document.getElementById('newID').value.trim().toUpperCase();
+        if (!id || !document.getElementById('cityO').value) return alert("Fill all fields.");
+        
+        const pkgData = {
+            status: document.getElementById('newStatus').value,
+            origin: document.getElementById('cityO').value,
+            destination: document.getElementById('cityD').value,
+            type: document.getElementById('newType').value || "Express Parcel",
+            weight: document.getElementById('newWeight').value || "2.5 kg",
+            history: [
+                { date: "Mar 28, 2026", msg: "Global Logistics Scan: " + document.getElementById('newStatus').value, loc: document.getElementById('cityO').value },
+                { date: "Mar 27, 2026", msg: "Package Received at Processing Center", loc: "Service Hub" }
+            ]
+        };
+
+        database[id] = pkgData;
+        localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+        renderShipmentList();
+
+        // --- THE MAGIC PART ---
+        // Generates a link that contains all the data. 
+        // Send this link to the customer or open it on another phone.
+        const syncPayload = btoa(JSON.stringify({id: id, data: pkgData}));
+        const syncUrl = window.location.origin + window.location.pathname + "?sync=" + syncPayload;
+        
+        prompt("COPY GLOBAL SYNC LINK:\nOpen this link on any phone to make this ID trackable there.", syncUrl);
+    }
+
+    function renderShipmentList() {
+        const list = document.getElementById('listItems');
+        list.innerHTML = "<strong>Local Database:</strong><br>";
+        Object.keys(database).forEach(id => {
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:8px; background:#f4f4f7; margin-top:5px; font-size:11px;">${id} <span onclick="deleteItem('${id}')" style="color:red; cursor:pointer;">DEL</span></div>`;
+        });
+    }
+
+    function deleteItem(id) {
+        delete database[id];
+        localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+        renderShipmentList();
+    }
+</script>
 </body>
 </html>
