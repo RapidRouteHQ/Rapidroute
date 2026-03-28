@@ -237,76 +237,8 @@
 
     <script>
         const OFFICIAL_EMAIL = "rapidroute.globa1ex@gmail.com";
-        let database = // --- 1. THE GLOBAL HARDCODED DATABASE ---
-// Every ID you put here will work on EVERY phone that opens this site.
-const globalRegistry = {
-    "RR-789735171573": {
-        status: "Clearance Delay",
-        origin: "London, UK",
-        destination: "Lagos, Nigeria",
-        type: "Express Parcel",
-        weight: "4.5 kg",
-        history: [
-            { date: "Mar 28, 2026", time: "09:00 AM", msg: "HELD: Customs clearance fee required.", loc: "Lagos Hub" },
-            { date: "Mar 27, 2026", time: "11:00 AM", msg: "Arrived at Destination Country", loc: "Lagos Port" }
-        ]
-    },
-    // PASTE NEW GENERATED CODES BELOW THIS LINE
-};
-
-// --- 2. THE TRACKING LOGIC ---
-function triggerSearch() {
-    const id = document.getElementById('trackingInput').value.trim().toUpperCase();
-    
-    // Checks the Global Registry first
-    if (globalRegistry[id]) {
-        document.getElementById('loader').style.display = 'flex';
-        setTimeout(() => {
-            document.getElementById('loader').style.display = 'none';
-            renderUI(id, globalRegistry[id]);
-        }, 1200);
-    } else {
-        alert("ID Not Found. Please verify the tracking number.");
-    }
-}
-
-// --- 3. THE GENERATOR (For your eyes only) ---
-function addPackage() {
-    const id = document.getElementById('newID').value.toUpperCase();
-    const pkg = {
-        status: document.getElementById('newStatus').value,
-        origin: document.getElementById('cityO').value,
-        destination: document.getElementById('cityD').value,
-        type: document.getElementById('newType').value || "Express",
-        weight: document.getElementById('newWeight').value || "2.5kg",
-        history: [{ date: "Current", time: "Live", msg: "Processing", loc: "Origin Hub" }]
-    };
-
-    // This creates the text you need to paste into the Global Registry
-    const codeToPaste = `"${id}": ${JSON.stringify(pkg, null, 4)},`;
-    
-    console.log(codeToPaste);
-    document.getElementById('listItems').innerHTML = `
-        <p style="color:red; font-size:10px;">COPY THIS INTO YOUR "globalRegistry" IN THE CODE:</p>
-        <textarea style="width:100%; height:100px; font-size:10px;">${codeToPaste}</textarea>`;
-    
-    alert("Code Generated. Now paste it into the 'globalRegistry' section of your HTML file.");
-}
-
-// Helper to show the data
-function renderUI(id, data) {
-    document.getElementById('resultArea').classList.remove('hidden');
-    document.getElementById('trackingIDDisplay').innerText = id;
-    document.getElementById('statusText').innerText = data.status;
-    document.getElementById('originDisplay').innerText = data.origin;
-    document.getElementById('destDisplay').innerText = data.destination;
-    document.getElementById('weightDisplay').innerText = data.weight;
-    
-    const pos = { "Pending": "5%", "In Transit": "45%", "Clearance Delay": "70%", "Delivered": "95%" };
-    document.getElementById('plane').style.left = pos[data.status] || "50%";
-        }
-        
-
+        let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
+        let mapInstance = null;
 
         function handleSecretClick() {
             const code = prompt("AUTHENTICATION REQUIRED:");
@@ -453,5 +385,3 @@ function renderUI(id, data) {
     </script>
 </body>
 </html>
-
-
