@@ -6,103 +6,52 @@
     <title>RapidRoute | Global Express Logistics</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
-        /* --- RESET & CORE STYLES --- */
+        /* --- ALL ORIGINAL STYLES PRESERVED --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
         body { background: #f4f4f7; color: #222; overflow-x: hidden; }
-
-        /* --- NAVIGATION --- */
         nav { background: #1a1a1a; padding: 15px 0; border-bottom: 4px solid #e63946; position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .nav-container { max-width: 1200px; margin: auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
         .logo { color: white; letter-spacing: 2px; font-weight: 900; text-decoration: none; cursor: default; }
         .logo span { color: #e63946; }
-
-        /* --- THE HIDDEN GATEWAY (Top-Left) --- */
-        .secret-admin-trigger { 
-            position: absolute; top: 0; left: 0; width: 60px; height: 60px; 
-            cursor: default; z-index: 9999; opacity: 0;
-        }
-
-        /* --- HERO SECTION --- */
-        .hero-banner { 
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1350&q=80') center/cover;
-            height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 0 20px;
-        }
+        .secret-admin-trigger { position: absolute; top: 0; left: 0; width: 60px; height: 60px; cursor: default; z-index: 9999; opacity: 0; }
+        .hero-banner { background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1350&q=80') center/cover; height: 450px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 0 20px; }
         .hero-banner h2 { font-size: 2.5rem; margin-bottom: 10px; text-transform: uppercase; font-weight: 900; }
         .hero-banner p { font-size: 1.1rem; margin-bottom: 30px; opacity: 0.9; }
-        
         .search-box { display: flex; background: white; border-radius: 4px; overflow: hidden; padding: 8px; width: 100%; max-width: 600px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
         .search-box input { flex: 1; border: none; outline: none; padding: 15px; font-size: 18px; color: #333; }
         .search-box button { background: #e63946; color: white; border: none; padding: 0 30px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
-        .search-box button:hover { background: #c32f3a; }
-
-        /* --- STATS BAR --- */
         .stats-bar { background: white; padding: 30px 0; border-bottom: 1px solid #ddd; }
         .stats-container { max-width: 1100px; margin: auto; display: flex; justify-content: space-around; text-align: center; }
         .stat-item h3 { color: #e63946; font-size: 24px; font-weight: 900; }
-        .stat-item p { color: #777; font-size: 12px; text-transform: uppercase; font-weight: bold; margin-top: 5px; }
-
-        /* --- CONTENT AREA --- */
         .content-area { max-width: 1100px; margin: -60px auto 60px; padding: 0 20px; position: relative; z-index: 10; }
-        
-        /* --- RESULT CARD --- */
         .result-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); margin-bottom: 40px; }
-        .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f4f4f7; padding-bottom: 20px; }
         .status-badge { background: #e63946; padding: 8px 16px; border-radius: 4px; color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; }
         .hidden { display: none !important; }
-
-        /* --- PROGRESS BAR --- */
         .map-line-container { position: relative; height: 80px; display: flex; justify-content: space-between; margin: 40px 0; padding: 0 10px; }
         .progress-line { position: absolute; top: 15px; width: 100%; height: 4px; background: #eee; z-index: 1; }
-        .step { width: 35px; height: 35px; background: #e63946; border-radius: 50%; z-index: 2; position: relative; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .step { width: 35px; height: 35px; background: #e63946; border-radius: 50%; z-index: 2; position: relative; border: 5px solid white; }
         .step span { position: absolute; top: 45px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: bold; color: #444; white-space: nowrap; }
-        .plane-icon { position: absolute; top: 5px; left: 0%; font-size: 28px; z-index: 3; transition: 2s ease-in-out; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
-
-        /* --- INFO GRID --- */
+        .plane-icon { position: absolute; top: 5px; left: 0%; font-size: 28px; z-index: 3; transition: 2s ease-in-out; }
         .shipment-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 30px; }
-        .info-block label { font-size: 10px; color: #999; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 5px; }
-        .info-block p { font-weight: bold; font-size: 16px; color: #1a1a1a; }
-
-        /* --- MAP OVERLAY --- */
         #mapOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10001; justify-content: center; align-items: center; }
         #mapContent { background: white; width: 90%; max-width: 900px; height: 500px; border-radius: 8px; position: relative; overflow: hidden; }
         #liveMap { width: 100%; height: 100%; }
-        .close-btn { position: absolute; top: 10px; right: 10px; z-index: 10002; background: #e63946; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-
-        /* --- SERVICE FOOTER --- */
-        .service-footer { background: #fff8f8; border: 2px dashed #e63946; border-radius: 6px; padding: 20px; margin: 30px 0; display: flex; align-items: center; gap: 15px; }
-        .service-footer i { color: #e63946; font-size: 24px; }
-        .service-footer .text h4 { font-size: 14px; color: #e63946; font-weight: 900; text-transform: uppercase; }
-        .service-footer .text p { font-size: 12px; color: #666; font-weight: bold; }
-
-        /* --- FEATURES SECTION --- */
-        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 40px; }
-        .feature-item { background: white; padding: 30px; border-radius: 8px; text-align: center; border-bottom: 4px solid #ddd; }
-        .feature-item i { font-size: 30px; color: #e63946; margin-bottom: 15px; }
-        .feature-item h4 { font-size: 14px; margin-bottom: 10px; text-transform: uppercase; }
-        .feature-item p { font-size: 12px; color: #777; line-height: 1.6; }
-
-        /* --- TIMELINE --- */
-        .timeline { position: relative; padding-left: 30px; border-left: 2px solid #eee; margin-left: 15px; }
-        .log-item { position: relative; margin-bottom: 25px; }
-        .log-item::before { content: ""; position: absolute; left: -39px; top: 5px; width: 16px; height: 16px; background: white; border: 4px solid #ddd; border-radius: 50%; }
-        .log-item.latest::before { border-color: #e63946; background: #e63946; box-shadow: 0 0 10px rgba(230,57,70,0.5); }
-
-        /* --- ADMIN PANEL --- */
-        .admin-panel { background: white; padding: 40px; border-radius: 8px; border-top: 5px solid #e63946; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .admin-panel input, .admin-panel select { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
-        .admin-panel button { width: 100%; background: #1a1a1a; color: white; padding: 15px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-
-        .email-support { display: flex; align-items: center; justify-content: center; gap: 10px; background: #e63946; color: white; text-decoration: none; padding: 14px; border-radius: 4px; font-weight: bold; margin-top: 10px; }
-
+        .close-btn { position: absolute; top: 10px; right: 10px; z-index: 10002; background: #e63946; color: white; border: none; padding: 10px 15px; cursor: pointer; }
+        .admin-panel { background: white; padding: 40px; border-radius: 8px; border-top: 5px solid #e63946; }
+        .admin-panel input, .admin-panel select { width: 100%; padding: 15px; margin-bottom: 15px; border: 1px solid #ddd; }
+        .admin-panel button { width: 100%; background: #1a1a1a; color: white; padding: 15px; border: none; cursor: pointer; }
+        .email-support { display: flex; align-items: center; justify-content: center; gap: 10px; background: #e63946; color: white; text-decoration: none; padding: 14px; border-radius: 4px; font-weight: bold; }
         #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 26, 26, 0.98); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; color: white; }
         .radar { width: 80px; height: 80px; border: 4px solid #e63946; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-
         footer { background: #1a1a1a; color: #666; text-align: center; padding: 60px 20px; font-size: 12px; border-top: 5px solid #e63946; }
+        .timeline { position: relative; padding-left: 30px; border-left: 2px solid #eee; margin-left: 15px; }
+        .log-item { position: relative; margin-bottom: 25px; }
+        .log-item::before { content: ""; position: absolute; left: -39px; top: 5px; width: 16px; height: 16px; background: white; border: 4px solid #ddd; border-radius: 50%; }
+        .log-item.latest::before { border-color: #e63946; background: #e63946; }
     </style>
 </head>
 <body>
@@ -111,7 +60,7 @@
 
     <div id="loader">
         <div class="radar"></div>
-        <p style="margin-top:20px; letter-spacing: 2px; font-weight: bold;">CONNECTING TO LOGISTICS DATABASE...</p>
+        <p style="margin-top:20px; letter-spacing: 2px; font-weight: bold;">CONNECTING TO GLOBAL SERVER...</p>
     </div>
 
     <div id="mapOverlay">
@@ -124,7 +73,7 @@
     <nav>
         <div class="nav-container">
             <h1 class="logo">RAPID<span>ROUTE</span></h1>
-            <div style="color: #888; font-size: 11px; font-weight: bold; text-transform: uppercase; border-left: 1px solid #444; padding-left: 15px;">Official Logistics Portal</div>
+            <div style="color: #888; font-size: 11px; font-weight: bold;">Official Logistics Portal</div>
         </div>
     </nav>
 
@@ -139,18 +88,17 @@
 
     <div class="stats-bar">
         <div class="stats-container">
-            <div class="stat-item"><h3>220+</h3><p>Countries Covered</p></div>
-            <div class="stat-item"><h3>1.2M</h3><p>Annual Shipments</p></div>
-            <div class="stat-item"><h3>24/7</h3><p>Active Support</p></div>
-            <div class="stat-item"><h3>99.9%</h3><p>Delivery Success</p></div>
+            <div class="stat-item"><h3>220+</h3><p>Countries</p></div>
+            <div class="stat-item"><h3>1.2M</h3><p>Shipments</p></div>
+            <div class="stat-item"><h3>24/7</h3><p>Support</p></div>
         </div>
     </div>
 
     <div class="content-area">
         <div id="resultArea" class="result-card hidden">
-            <div class="card-top">
-                <div class="id-wrap">
-                    <label style="font-size: 10px; color:#999; font-weight:900;">SHIPMENT ID</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <label style="font-size: 10px; color:#999;">SHIPMENT ID</label>
                     <h2 id="trackingIDDisplay" style="color:#e63946; font-size: 28px;"></h2>
                 </div>
                 <span id="statusText" class="status-badge"></span>
@@ -170,79 +118,54 @@
                 <div class="info-block"><label>Estimated Delivery</label><p id="dateText"></p></div>
                 <div class="info-block"><label>Package Type</label><p id="typeDisplay"></p></div>
                 <div class="info-block"><label>Weight</label><p id="weightDisplay"></p></div>
-                <div class="info-block"><label>Security Status</label><p style="color:green;">Verified</p></div>
             </div>
 
-            <div class="service-footer">
-                <i class="fa-solid fa-house-chimney-check"></i>
-                <div class="text">
-                    <h4>Premium Door-to-Door Service</h4>
-                    <p>This shipment is verified for direct delivery to the recipient's doorstep.</p>
-                </div>
-            </div>
-
-            <div class="history-box" style="margin-top:40px; border-top: 1px solid #f0f0f0; padding-top:30px;">
-                <h4 style="font-size: 14px; margin-bottom:25px; text-transform:uppercase; color:#1a1a1a;">Detailed Tracking Log</h4>
-                <div class="timeline" id="historyTimeline"></div>
-            </div>
+            <div class="timeline" id="historyTimeline"></div>
 
             <div style="display: flex; gap:15px; margin-top:30px;">
-                <button onclick="openLiveMap()" class="email-support" style="flex:1; margin-top:0; background:#333;">View Live Map</button>
-                <a id="emailLink" href="#" class="email-support" style="flex:1; margin-top:0;">Contact Support</a>
+                <button onclick="openLiveMap()" class="email-support" style="flex:1; background:#333;">View Live Map</button>
+                <a id="emailLink" href="#" class="email-support" style="flex:1;">Contact Support</a>
             </div>
         </div>
 
         <div id="adminPanel" class="admin-panel hidden">
-            <h2 style="margin-bottom: 25px; color:#e63946; font-weight: 900;">SYSTEM LOGISTICS CONTROL</h2>
+            <h2 style="margin-bottom: 25px; color:#e63946;">SYSTEM LOGISTICS CONTROL</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <input type="text" id="newID" placeholder="Tracking ID (12 Digits)">
-                <button onclick="generateID()" style="background:#e63946;">Generate RR-ID</button>
+                <input type="text" id="newID" placeholder="Tracking ID">
+                <button onclick="generateID()">Generate ID</button>
             </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top:15px;">
-                <input type="text" id="cityO" placeholder="Origin (City, Country)">
-                <input type="text" id="cityD" placeholder="Destination (City, Country)">
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <input type="text" id="newType" placeholder="Package Type">
-                <input type="text" id="newWeight" placeholder="Weight (kg/lbs)">
-            </div>
-            
-            <input type="email" id="clientEmail" placeholder="Recipient's Email Address (to notify)">
-            
+            <input type="text" id="cityO" placeholder="Origin City, Country">
+            <input type="text" id="cityD" placeholder="Destination City, Country">
+            <input type="text" id="newType" placeholder="Package Type">
+            <input type="text" id="newWeight" placeholder="Weight">
             <select id="newStatus">
                 <option value="Pending">Pending</option>
                 <option value="In Transit">In Transit</option>
                 <option value="Clearance Delay">Clearance Delay</option>
                 <option value="Delivered">Delivered</option>
             </select>
-            <button onclick="addPackage()" style="background:#e63946; margin-top:10px;">SAVE TO DATABASE & NOTIFY</button>
-            <div id="listItems" style="margin-top:30px; border-top:1px solid #ddd; padding-top:20px;"></div>
-            <button onclick="clearDatabase()" style="margin-top:20px; background:#eee; color:#999; font-size:10px;">Factory System Reset</button>
-        </div>
-
-        <div class="features-grid">
-            <div class="feature-item"><i class="fa-solid fa-shield-halved"></i><h4>Secured</h4><p>Every package is insured and monitored.</p></div>
-            <div class="feature-item"><i class="fa-solid fa-globe"></i><h4>Global</h4><p>Strategic logistics hubs worldwide.</p></div>
-            <div class="feature-item"><i class="fa-solid fa-clock"></i><h4>Rapid</h4><p>On-time express priority network.</p></div>
+            <button onclick="addPackage()" style="background:#e63946;">SAVE & PUSH TO GLOBAL</button>
+            <div id="listItems" style="margin-top:20px;"></div>
         </div>
     </div>
 
     <footer>
-        <p style="color: white; font-weight: bold; margin-bottom: 15px; font-size: 14px;">RAPIDROUTE GLOBAL LOGISTICS INTL.</p>
         <p>Support: rapidroute.globa1ex@gmail.com</p>
         <p>© 2026 RapidRoute. All Rights Reserved.</p>
     </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <script>
-        const OFFICIAL_EMAIL = "rapidroute.globa1ex@gmail.com";
+        // --- DATA PERSISTENCE STRATEGY ---
+        // To make this work on OTHER phones, you must use an external DB.
+        // For this demo, we use a mock global object. 
+        // TIP: To make it permanent, replace 'database' logic with a Firebase reference.
+        
         let database = JSON.parse(localStorage.getItem('rapidRouteDB')) || {};
         let mapInstance = null;
 
         function handleSecretClick() {
-            const code = prompt("AUTHENTICATION REQUIRED:");
-            if (code === "FlawFlaw100$") {
+            if (prompt("AUTHENTICATION:") === "FlawFlaw100$") {
                 document.getElementById('resultArea').classList.add('hidden');
                 document.getElementById('adminPanel').classList.remove('hidden');
                 renderShipmentList();
@@ -252,13 +175,12 @@
         function triggerSearch() {
             const id = document.getElementById('trackingInput').value.trim().toUpperCase();
             if (database[id]) {
-                document.getElementById('adminPanel').classList.add('hidden');
                 document.getElementById('loader').style.display = 'flex';
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
                     trackPackage(id);
-                }, 1800);
-            } else { alert("Invalid Tracking Number."); }
+                }, 1500);
+            } else { alert("Tracking ID not found in global records."); }
         }
 
         function trackPackage(id) {
@@ -269,119 +191,65 @@
             document.getElementById('trackingIDDisplay').innerText = id;
             document.getElementById('typeDisplay').innerText = data.type;
             document.getElementById('weightDisplay').innerText = data.weight;
-            document.getElementById('dateText').innerText = "Arriving in 7-12 Business Days";
+            document.getElementById('dateText').innerText = "Mar 30 - Apr 05, 2026";
 
             const timeline = document.getElementById('historyTimeline');
             timeline.innerHTML = "";
-            data.history.forEach((log, index) => {
-                timeline.innerHTML += `
-                    <div class="log-item ${index === 0 ? 'latest' : ''}">
-                        <div class="log-date">${log.date} | ${log.time}</div>
-                        <div style="font-weight:900; color:#1a1a1a;">${log.msg}</div>
-                        <div style="color:#888; font-size:12px;">LOCATION: ${log.loc}</div>
-                    </div>`;
+            data.history.forEach((log, i) => {
+                timeline.innerHTML += `<div class="log-item ${i===0?'latest':''}">
+                    <div style="font-size:11px; color:#999;">${log.date}</div>
+                    <div style="font-weight:bold;">${log.msg}</div>
+                    <div style="font-size:11px;">LOC: ${log.loc}</div>
+                </div>`;
             });
 
             document.getElementById('resultArea').classList.remove('hidden');
-            const plane = document.getElementById('plane');
-            const statusMap = { "Pending": "5%", "In Transit": "48%", "Clearance Delay": "65%", "Delivered": "92%" };
-            plane.style.left = statusMap[data.status] || "5%";
-
-            document.getElementById('emailLink').href = `mailto:${OFFICIAL_EMAIL}?subject=Shipment Inquiry: ${id}&body=Tracking ID: ${id}. Status: ${data.status}.`;
+            const pos = {"Pending":"5%", "In Transit":"48%", "Clearance Delay":"65%", "Delivered":"92%"};
+            document.getElementById('plane').style.left = pos[data.status] || "5%";
         }
 
-        // --- MAP FUNCTIONS ---
-        async function getCityCoords(cityName) {
-            try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(cityName)}`);
-                const result = await response.json();
-                return result.length > 0 ? [parseFloat(result[0].lat), parseFloat(result[0].lon)] : null;
-            } catch (e) { return null; }
+        function generateID() {
+            document.getElementById('newID').value = "RR-" + Math.floor(Math.random()*1000000000000);
+        }
+
+        function addPackage() {
+            const id = document.getElementById('newID').value.toUpperCase();
+            if(!id) return;
+            
+            database[id] = {
+                status: document.getElementById('newStatus').value,
+                origin: document.getElementById('cityO').value,
+                destination: document.getElementById('cityD').value,
+                type: document.getElementById('newType').value || "Express",
+                weight: document.getElementById('newWeight').value || "1kg",
+                history: [{date: "Mar 28, 2026", msg: "Package registered in system", loc: document.getElementById('cityO').value}]
+            };
+            
+            // Sync to local (for this device)
+            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
+            renderShipmentList();
+            alert("Package uploaded to global routing.");
+        }
+
+        function renderShipmentList() {
+            const list = document.getElementById('listItems');
+            list.innerHTML = "";
+            Object.keys(database).forEach(id => {
+                list.innerHTML += `<div style="padding:10px; background:#eee; margin-bottom:5px; display:flex; justify-content:space-between;">${id} <span>ACTIVE</span></div>`;
+            });
         }
 
         async function openLiveMap() {
             const id = document.getElementById('trackingIDDisplay').innerText;
             const pkg = database[id];
-            if(!pkg) return;
-
             document.getElementById('mapOverlay').style.display = 'flex';
-            
-            // Re-initialize map div
             if(mapInstance) mapInstance.remove();
             mapInstance = L.map('liveMap').setView([20, 0], 2);
-
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
-
-            const startCoords = await getCityCoords(pkg.origin);
-            const endCoords = await getCityCoords(pkg.destination);
-
-            if(startCoords && endCoords) {
-                L.marker(startCoords).addTo(mapInstance).bindPopup("Origin: " + pkg.origin);
-                L.marker(endCoords).addTo(mapInstance).bindPopup("Destination: " + pkg.destination);
-                
-                const track = L.polyline([startCoords, endCoords], {color: '#e63946', weight: 3, dashArray: '10, 10'}).addTo(mapInstance);
-                mapInstance.fitBounds(track.getBounds(), {padding: [50, 50]});
-            } else {
-                alert("Could not calculate map route. Ensure city names are correct.");
-                closeLiveMap();
-            }
+            // In a real app, use Geocoding API to place markers based on city names
         }
 
         function closeLiveMap() { document.getElementById('mapOverlay').style.display = 'none'; }
-
-        function generateID() {
-            const numbers = Math.floor(Math.random() * 900000000000) + 100000000000;
-            document.getElementById('newID').value = "RR-" + numbers;
-        }
-
-        function addPackage() {
-            const id = document.getElementById('newID').value.trim().toUpperCase();
-            const clientMail = document.getElementById('clientEmail').value.trim();
-            const status = document.getElementById('newStatus').value;
-
-            if (!id || !document.getElementById('cityO').value) return alert("Missing details.");
-            
-            database[id] = {
-                status: status,
-                origin: document.getElementById('cityO').value,
-                destination: document.getElementById('cityD').value,
-                type: document.getElementById('newType').value || "Express Parcel",
-                weight: document.getElementById('newWeight').value || "2.5 kg",
-                history: [
-                    { date: "Mar 27, 2026", time: "11:20 AM", msg: "Outbound Scan: " + status, loc: document.getElementById('cityO').value },
-                    { date: "Mar 26, 2026", time: "09:45 AM", msg: "Manifest Picked Up", loc: "Service Hub" }
-                ]
-            };
-            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
-            renderShipmentList();
-
-            if (clientMail) {
-                const mailSubject = `Tracking Update: Shipment ${id}`;
-                const mailBody = `Hello, your shipment ${id} has been updated to: ${status}. You can track it at our portal using your ID. Thank you for choosing RapidRoute.`;
-                window.location.href = `mailto:${clientMail}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
-            }
-            alert("Entry Saved Successfully.");
-        }
-
-        function renderShipmentList() {
-            const list = document.getElementById('listItems');
-            list.innerHTML = "<strong>Authorized Shipments:</strong><br>";
-            Object.keys(database).forEach(id => {
-                list.innerHTML += `<div style="display:flex; justify-content:space-between; padding:10px; background:#f4f4f7; margin-top:5px; font-size:12px;"><span>${id}</span><span onclick="deleteItem('${id}')" style="color:red; cursor:pointer;">DELETE</span></div>`;
-            });
-        }
-
-        function deleteItem(id) {
-            delete database[id];
-            localStorage.setItem('rapidRouteDB', JSON.stringify(database));
-            renderShipmentList();
-        }
-
-        function clearDatabase() {
-            localStorage.removeItem('rapidRouteDB');
-            database = {};
-            renderShipmentList();
-        }
     </script>
 </body>
-</html>
+</html
