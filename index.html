@@ -3,60 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RapidRoute | Global Express</title>
+    <title>RapidRoute Global Express | Tracking</title>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f7; padding: 20px; text-align: center; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 20px auto; }
-        input, select { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        button { width: 95%; padding: 12px; background: #00274c; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        :root { --primary: #00274c; --accent: #ffcc00; --bg: #f4f7f9; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); cursor: pointer; }
+        .container { max-width: 500px; margin: 20px auto; padding: 15px; }
+        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #004080; }
+        
+        /* Progress Bar Styles */
+        .progress-track { position: relative; height: 10px; background: #ddd; border-radius: 5px; margin: 40px 0; }
+        .plane { position: absolute; top: -25px; font-size: 24px; transition: 1s ease-in-out; }
+        
+        .status-tag { display: inline-block; padding: 5px 15px; border-radius: 20px; background: #e8f0fe; color: var(--primary); font-weight: bold; margin-bottom: 15px; }
         .hidden { display: none; }
-        .status-box { background: #e8f0fe; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left; }
-        #loader { display: none; color: #00274c; font-weight: bold; margin: 10px; }
+        #loader { display: none; text-align: center; margin: 10px; color: var(--primary); font-weight: bold; }
+        .admin-list-item { display: flex; justify-content: space-between; background: #eee; padding: 10px; margin-top: 5px; border-radius: 5px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <h2 onclick="handleAdminLogin()">RapidRoute Global</h2>
-    
-    <div id="searchArea" class="card">
-        <h3>Track Your Shipment</h3>
-        <input type="text" id="trackInput" placeholder="Enter Tracking ID (e.g. RR-123456)">
-        <button onclick="globalSearch()">TRACK PACKAGE</button>
-        <div id="loader">Connecting to Global Server...</div>
+    <div class="header" onclick="checkAdmin()">
+        <h1>RapidRoute</h1>
+        <p>Global Logistics & Express</p>
     </div>
 
-    <div id="resultArea" class="card hidden">
-        <div class="status-box">
-            <p><strong>ID:</strong> <span id="resID"></span></p>
-            <p><strong>Status:</strong> <span id="resStatus" style="color: blue;"></span></p>
-            <p><strong>Location:</strong> <span id="resLoc"></span></p>
-            <p><strong>Weight:</strong> <span id="resWeight"></span></p>
+    <div class="container">
+        <div id="searchArea" class="card">
+            <h3 style="margin-top:0;">Track Shipment</h3>
+            <input type="text" id="trackInput" placeholder="Enter Tracking Number (e.g. RR-123456)">
+            <button onclick="globalSearch()">TRACK NOW</button>
+            <div id="loader">🛰️ Connecting to Global Satellite...</div>
         </div>
-        <button onclick="location.reload()" style="background:#666; margin-top:10px;">New Search</button>
-    </div>
 
-    <div id="adminPanel" class="card hidden" style="border: 2px solid red;">
-        <h3>Admin Console</h3>
-        <input type="text" id="newID" placeholder="Tracking ID">
-        <button onclick="generateRandomID()" style="background:#444; margin-bottom:10px;">Generate ID</button>
-        <select id="newStatus">
-            <option>Pending</option>
-            <option>In Transit</option>
-            <option>Clearance Delay</option>
-            <option>Delivered</option>
-        </select>
-        <input type="text" id="newLoc" placeholder="Current City/Port">
-        <input type="text" id="newWeight" placeholder="Weight (e.g. 5.0 lbs)">
-        <button onclick="saveToCloud()" style="background: green;">SAVE TO GLOBAL DATABASE</button>
-        <hr>
-        <div id="adminList"></div>
+        <div id="resultArea" class="card hidden">
+            <div id="statusTag" class="status-tag">In Transit</div>
+            <h2 id="resID" style="margin:0; color:var(--primary);"></h2>
+            <hr>
+            <div class="progress-track">
+                <div id="plane" class="plane">✈️</div>
+            </div>
+            <p><strong>Current Location:</strong> <span id="resLoc"></span></p>
+            <p><strong>Package Type:</strong> <span id="resType"></span></p>
+            <p><strong>Weight:</strong> <span id="resWeight"></span></p>
+            <button onclick="location.reload()" style="background:#666; margin-top:15px;">NEW SEARCH</button>
+        </div>
+
+        <div id="adminPanel" class="card hidden" style="border: 2px dashed #ff4444;">
+            <h3 style="color:#ff4444;">Admin Control Panel</h3>
+            <input type="text" id="newID" placeholder="Tracking ID">
+            <button onclick="genID()" style="background:#444; margin-bottom:10px;">AUTO-GENERATE ID</button>
+            <select id="newStatus">
+                <option value="Pending">Pending</option>
+                <option value="In Transit">In Transit</option>
+                <option value="Clearance Delay">Clearance Delay</option>
+                <option value="Delivered">Delivered</option>
+            </select>
+            <input type="text" id="newLoc" placeholder="Current Location (City, Country)">
+            <input type="text" id="newWeight" placeholder="Package Weight (e.g. 12.5kg)">
+            <input type="text" id="newType" placeholder="Service Type (e.g. Express Air)">
+            <button onclick="saveToCloud()" style="background:#28a745;">PUBLISH TO GLOBAL CLOUD</button>
+            <div id="adminList" style="margin-top:20px;"></div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // YOUR UNIQUE KEYS
         const firebaseConfig = {
             apiKey: "AIzaSyCYyMXhRCHTXjRMgG9o4-yihKh7QuQ62Xg",
             authDomain: "rapidroute-global-express.firebaseapp.com",
@@ -69,7 +86,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. SEARCH FUNCTION (Works on all phones)
+        // 1. GLOBAL SEARCH
         function globalSearch() {
             const id = document.getElementById('trackInput').value.trim().toUpperCase();
             if(!id) return;
@@ -80,62 +97,72 @@
                 document.getElementById('loader').style.display = 'none';
                 if(snapshot.exists()) {
                     const data = snapshot.val();
-                    document.getElementById('searchArea').classList.add('hidden');
-                    document.getElementById('resultArea').classList.remove('hidden');
-                    
-                    document.getElementById('resID').innerText = id;
-                    document.getElementById('resStatus').innerText = data.status;
-                    document.getElementById('resLoc').innerText = data.location;
-                    document.getElementById('resWeight').innerText = data.weight;
+                    showResult(id, data);
                 } else {
-                    alert("Tracking ID not found in global records.");
+                    alert("ERROR: Shipment ID not found in Global Database.");
                 }
             });
         }
 
-        // 2. ADMIN LOGIN
-        function handleAdminLogin() {
-            const pass = prompt("Access Key:");
-            if(pass === "FlawFlaw100$") {
+        function showResult(id, data) {
+            document.getElementById('searchArea').classList.add('hidden');
+            document.getElementById('resultArea').classList.remove('hidden');
+            document.getElementById('resID').innerText = id;
+            document.getElementById('resLoc').innerText = data.location;
+            document.getElementById('resWeight').innerText = data.weight;
+            document.getElementById('resType').innerText = data.type || "Standard";
+            document.getElementById('statusTag').innerText = data.status;
+
+            const plane = document.getElementById('plane');
+            const pos = { "Pending": "5%", "In Transit": "45%", "Clearance Delay": "70%", "Delivered": "92%" };
+            setTimeout(() => { plane.style.left = pos[data.status] || "5%"; }, 500);
+        }
+
+        // 2. ADMIN ACTIONS
+        function checkAdmin() {
+            const p = prompt("Enter Admin Key:");
+            if(p === "FlawFlaw100$") {
                 document.getElementById('adminPanel').classList.remove('hidden');
-                refreshAdminList();
+                loadList();
             }
         }
 
-        function generateRandomID() {
-            document.getElementById('newID').value = "RR-" + Math.floor(Math.random() * 900000 + 100000);
+        function genID() {
+            document.getElementById('newID').value = "RR-" + Math.floor(100000 + Math.random() * 900000);
         }
 
-        // 3. SAVE TO CLOUD (This makes it global)
         function saveToCloud() {
             const id = document.getElementById('newID').value.trim().toUpperCase();
-            const data = {
+            const payload = {
                 status: document.getElementById('newStatus').value,
                 location: document.getElementById('newLoc').value,
-                weight: document.getElementById('newWeight').value || "Unknown"
+                weight: document.getElementById('newWeight').value,
+                type: document.getElementById('newType').value
             };
+            if(!id || !payload.location) return alert("Missing Info");
 
-            db.ref('parcels/' + id).set(data).then(() => {
-                alert("Package " + id + " is now LIVE for all users.");
-                refreshAdminList();
+            db.ref('parcels/' + id).set(payload).then(() => {
+                alert("GLOBAL UPDATE SUCCESSFUL");
+                loadList();
             });
         }
 
-        function refreshAdminList() {
+        function loadList() {
             const list = document.getElementById('adminList');
-            db.ref('parcels').once('value').then((snapshot) => {
-                list.innerHTML = "<h4>Active Cloud Shipments:</h4>";
-                snapshot.forEach((child) => {
-                    list.innerHTML += `<div style="font-size:12px; margin-bottom:5px;">
-                        ${child.key} - <span style="color:red" onclick="deleteGlobal('${child.key}')">[DELETE]</span>
+            db.ref('parcels').once('value').then((snap) => {
+                list.innerHTML = "<strong>Cloud Registry:</strong>";
+                snap.forEach((child) => {
+                    list.innerHTML += `<div class="admin-list-item">
+                        <span>${child.key} (${child.val().status})</span>
+                        <span style="color:red; cursor:pointer;" onclick="del('${child.key}')">DEL</span>
                     </div>`;
                 });
             });
         }
 
-        function deleteGlobal(id) {
-            if(confirm("Delete globally?")) {
-                db.ref('parcels/' + id).remove().then(() => refreshAdminList());
+        function del(id) {
+            if(confirm("Remove " + id + " from Cloud?")) {
+                db.ref('parcels/' + id).remove().then(() => loadList());
             }
         }
     </script>
