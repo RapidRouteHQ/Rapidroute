@@ -3,71 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RapidRoute Global Express | Tracking</title>
+    <title>RapidRoute | Global Express Logistics</title>
     <style>
-        :root { --primary: #00274c; --accent: #ffcc00; --bg: #f4f7f9; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        .header { background: var(--primary); color: white; padding: 20px; text-align: center; border-bottom: 4px solid var(--accent); cursor: pointer; }
-        .container { max-width: 500px; margin: 20px auto; padding: 15px; }
-        .card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #004080; }
+        :root { --brand-red: #e63946; --brand-dark: #1b1b1b; --gray: #666; --bg: #f7f7f7; --alert: #d0021b; }
+        body, html { margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: #333; }
+
+        /* HEADER & BRANDING */
+        .header { background: var(--brand-dark); padding: 12px 0; border-bottom: 3px solid var(--brand-red); position: fixed; top: 0; width: 100%; z-index: 1000; text-align: center; }
+        .logo { color: white; font-weight: 900; font-size: 26px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; }
+        .logo span { color: var(--brand-red); }
+        .sub-tag { color: #aaa; font-size: 11px; display: block; margin-top: -2px; letter-spacing: 1px; font-weight: bold; }
         
-        /* Progress Bar Styles */
-        .progress-track { position: relative; height: 10px; background: #ddd; border-radius: 5px; margin: 40px 0; }
-        .plane { position: absolute; top: -25px; font-size: 24px; transition: 1s ease-in-out; }
-        
-        .status-tag { display: inline-block; padding: 5px 15px; border-radius: 20px; background: #e8f0fe; color: var(--primary); font-weight: bold; margin-bottom: 15px; }
+        /* HERO */
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover; background-position: center; height: 50vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; margin-top: 50px;
+        }
+        .search-wrap { background: white; padding: 5px; border-radius: 4px; display: flex; width: 95%; max-width: 600px; box-shadow: 0 15px 40px rgba(0,0,0,0.5); }
+        .search-wrap input { border: none; padding: 15px; flex-grow: 1; outline: none; font-size: 16px; color: #333; }
+        .search-wrap button { background: var(--brand-red); color: white; border: none; padding: 0 25px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+
+        /* STATS BAR */
+        .stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); background: white; padding: 25px 10px; margin: -40px auto 40px; max-width: 900px; border-radius: 8px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); position: relative; z-index: 10; text-align: center; }
+        .stat-item h2 { color: var(--brand-red); margin: 0; font-size: 22px; }
+        .stat-item p { margin: 5px 0 0; color: var(--gray); font-size: 9px; font-weight: bold; text-transform: uppercase; }
+
+        /* FEATURE CARDS (RESTORED) */
+        .pillar-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 1100px; margin: 40px auto; padding: 0 20px; }
+        .pillar { background: white; padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 4px solid transparent; }
+        .pillar:hover { border-color: var(--brand-red); transform: translateY(-5px); transition: 0.3s; }
+        .pillar-icon { font-size: 35px; margin-bottom: 15px; display: block; }
+        .pillar h3 { text-transform: uppercase; font-size: 16px; margin-bottom: 10px; color: #222; }
+        .pillar p { color: #777; font-size: 13px; line-height: 1.5; }
+
+        /* ALERT & TIMELINE */
+        .container { max-width: 750px; margin: 20px auto 100px; padding: 0 20px; }
+        .alert-banner { background: white; border-left: 6px solid var(--alert); padding: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .timeline-container { background: white; padding: 30px; border-radius: 8px; margin-top: 20px; }
+        .day-group { margin-bottom: 30px; border-left: 2px solid #ddd; position: relative; padding-left: 25px; }
+        .day-group::before { content: '▲'; position: absolute; left: -7px; top: 0; color: #aaa; background: white; font-size: 11px; }
+        .date-header { font-size: 17px; font-weight: 900; color: #1b1b1b; margin-bottom: 15px; text-transform: capitalize; }
+        .update-entry { margin-bottom: 18px; }
+        .update-time { font-size: 13px; font-weight: bold; }
+
+        /* ADMIN */
+        .admin-card { background: white; border: 2px dashed var(--brand-red); padding: 25px; border-radius: 8px; margin-top: 50px; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; }
+        .reg-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; cursor: pointer; }
+
+        .footer { background: var(--brand-dark); color: white; padding: 60px 20px; text-align: center; border-top: 5px solid var(--brand-red); }
         .hidden { display: none; }
-        #loader { display: none; text-align: center; margin: 10px; color: var(--primary); font-weight: bold; }
-        .admin-list-item { display: flex; justify-content: space-between; background: #eee; padding: 10px; margin-top: 5px; border-radius: 5px; font-size: 13px; }
     </style>
 </head>
 <body>
 
-    <div class="header" onclick="checkAdmin()">
-        <h1>RapidRoute</h1>
-        <p>Global Logistics & Express</p>
+    <div class="header">
+        <div class="logo" onclick="adminAccess()">RAPID<span>ROUTE</span></div>
+        <div class="sub-tag">GLOBAL EXPRESS LOGISTICS</div>
+    </div>
+
+    <div class="hero">
+        <h1 style="font-size: 2.2rem; margin-bottom: 10px;">GLOBAL EXPRESS TRACKING</h1>
+        <p style="opacity: 0.8; margin-bottom: 20px;">Real-time satellite monitoring for international shipments.</p>
+        <div class="search-wrap">
+            <input type="text" id="trackInput" placeholder="Enter Tracking ID">
+            <button onclick="userTrack()">TRACK NOW</button>
+        </div>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-item"><h2>220+</h2><p>Countries<br>Covered</p></div>
+        <div class="stat-item"><h2>1.2M</h2><p>Annual<br>Shipments</p></div>
+        <div class="stat-item"><h2>24/7</h2><p>Active<br>Support</p></div>
+        <div class="stat-item"><h2>99.9%</h2><p>Delivery<br>Success</p></div>
     </div>
 
     <div class="container">
-        <div id="searchArea" class="card">
-            <h3 style="margin-top:0;">Track Shipment</h3>
-            <input type="text" id="trackInput" placeholder="Enter Tracking Number (e.g. RR-123456)">
-            <button onclick="globalSearch()">TRACK NOW</button>
-            <div id="loader">🛰️ Connecting to Global Satellite...</div>
-        </div>
-
-        <div id="resultArea" class="card hidden">
-            <div id="statusTag" class="status-tag">In Transit</div>
-            <h2 id="resID" style="margin:0; color:var(--primary);"></h2>
-            <hr>
-            <div class="progress-track">
-                <div id="plane" class="plane">✈️</div>
+        <div id="resultBox" class="hidden">
+            <div id="customsAlert" class="alert-banner hidden">
+                <div style="color:var(--alert); font-size: 24px;">⚠️</div>
+                <div>
+                    <h4 style="margin:0; color:var(--alert); text-transform: uppercase;">Action Required; contact Global Express</h4>
+                    <p id="alertDetail" style="margin:5px 0 0; font-size: 12px; font-weight: bold; color: #555;"></p>
+                </div>
             </div>
-            <p><strong>Current Location:</strong> <span id="resLoc"></span></p>
-            <p><strong>Package Type:</strong> <span id="resType"></span></p>
-            <p><strong>Weight:</strong> <span id="resWeight"></span></p>
-            <button onclick="location.reload()" style="background:#666; margin-top:15px;">NEW SEARCH</button>
+
+            <div style="background:white; padding:20px; border-radius:8px; border-left:8px solid var(--brand-red); box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <h3 id="resID" style="margin:0;"></h3>
+                <p id="resStatus" style="margin:5px 0 0; color:var(--brand-red); font-weight:bold; text-transform: uppercase;"></p>
+            </div>
+            
+            <div class="timeline-container">
+                <h4 style="margin-top:0; border-bottom:2px solid var(--brand-red); display: inline-block; padding-bottom:5px; margin-bottom:20px;">ALL SHIPMENT UPDATES</h4>
+                <div id="timelineContent"></div>
+            </div>
+            <button onclick="location.reload()" style="width:100%; padding:15px; background:#444; color:white; border:none; margin-top:20px; border-radius:4px; font-weight:bold;">NEW SEARCH</button>
         </div>
 
-        <div id="adminPanel" class="card hidden" style="border: 2px dashed #ff4444;">
-            <h3 style="color:#ff4444;">Admin Control Panel</h3>
-            <input type="text" id="newID" placeholder="Tracking ID">
-            <button onclick="genID()" style="background:#444; margin-bottom:10px;">AUTO-GENERATE ID</button>
-            <select id="newStatus">
-                <option value="Pending">Pending</option>
-                <option value="In Transit">In Transit</option>
-                <option value="Clearance Delay">Clearance Delay</option>
-                <option value="Delivered">Delivered</option>
-            </select>
-            <input type="text" id="newLoc" placeholder="Current Location (City, Country)">
-            <input type="text" id="newWeight" placeholder="Package Weight (e.g. 12.5kg)">
-            <input type="text" id="newType" placeholder="Service Type (e.g. Express Air)">
-            <button onclick="saveToCloud()" style="background:#28a745;">PUBLISH TO GLOBAL CLOUD</button>
-            <div id="adminList" style="margin-top:20px;"></div>
+        <div id="pillarSection" class="pillar-container">
+            <div class="pillar">
+                <span class="pillar-icon">🛡️</span>
+                <h3>SECURED</h3>
+                <p>Every package is insured and monitored via satellite 24/7 until destination.</p>
+            </div>
+            <div class="pillar">
+                <span class="pillar-icon">🌐</span>
+                <h3>GLOBAL</h3>
+                <p>Strategic logistics hubs worldwide ensure the fastest possible transit routes.</p>
+            </div>
+            <div class="pillar">
+                <span class="pillar-icon">⏱️</span>
+                <h3>RAPID</h3>
+                <p>On-time express priority network designed for urgent delivery requirements.</p>
+            </div>
         </div>
+
+        <div id="adminBoard" class="admin-card hidden">
+            <h2 style="margin-top:0; color:var(--brand-red); font-size:18px;">Management Control Panel</h2>
+            <input type="text" id="edID" placeholder="Tracking ID">
+            <input type="text" id="edLoc" placeholder="Current Location (e.g. CINCINNATI HUB, OH - USA)">
+            <input type="text" id="edWeight" placeholder="Package Weight">
+            <select id="edStatus">
+                <option>Shipment information received</option>
+                <option>Arrived at Sort Facility</option>
+                <option>Processed at Facility</option>
+                <option>Clearance processing complete</option>
+                <option>Shipment on hold</option>
+                <option>Departed Facility</option>
+                <option>Out for Delivery</option>
+                <option>Delivered</option>
+            </select>
+            <button onclick="syncToCloud()" style="width:100%; padding:15px; background:#28a745; color:white; border:none; font-weight:bold; border-radius:4px; cursor:pointer; margin-top:10px;">PUBLISH GLOBAL UPDATE</button>
+            <div id="registryList" style="margin-top:25px; border-top:1px solid #eee; max-height:200px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <h3>RAPIDROUTE GLOBAL LOGISTICS INTL.</h3>
+        <p style="font-size:12px; opacity:0.6;">Support: rapidroute.globa1ex@gmail.com<br>© 2026 RapidRoute. All Rights Reserved.</p>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -79,91 +153,88 @@
             authDomain: "rapidroute-global-express.firebaseapp.com",
             databaseURL: "https://rapidroute-global-express-default-rtdb.firebaseio.com",
             projectId: "rapidroute-global-express",
-            storageBucket: "rapidroute-global-express.appspot.com",
             appId: "1:47351047355:web:a94209ba83f0e116bb59e"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. GLOBAL SEARCH
-        function globalSearch() {
+        function userTrack() {
             const id = document.getElementById('trackInput').value.trim().toUpperCase();
             if(!id) return;
+            db.ref('parcels/' + id).once('value').then((s) => {
+                if(s.exists()){
+                    const d = s.val();
+                    document.getElementById('resultBox').classList.remove('hidden');
+                    document.getElementById('pillarSection').classList.add('hidden');
+                    document.getElementById('resID').innerText = id;
+                    document.getElementById('resStatus').innerText = d.status;
+                    
+                    if(d.status === "Shipment on hold") {
+                        document.getElementById('customsAlert').classList.remove('hidden');
+                        document.getElementById('alertDetail').innerText = d.history[d.history.length-1].time + " | " + d.location;
+                    } else { document.getElementById('customsAlert').classList.add('hidden'); }
 
-            document.getElementById('loader').style.display = 'block';
-
-            db.ref('parcels/' + id).once('value').then((snapshot) => {
-                document.getElementById('loader').style.display = 'none';
-                if(snapshot.exists()) {
-                    const data = snapshot.val();
-                    showResult(id, data);
-                } else {
-                    alert("ERROR: Shipment ID not found in Global Database.");
-                }
+                    let html = "";
+                    let history = d.history || [];
+                    let groups = {};
+                    history.slice().reverse().forEach(entry => {
+                        let date = entry.time.split('|')[0].trim(); 
+                        if(!groups[date]) groups[date] = [];
+                        groups[date].push(entry);
+                    });
+                    for(let date in groups) {
+                        html += `<div class="day-group"><div class="date-header">${date}</div>`;
+                        groups[date].forEach(e => {
+                            let timeOnly = e.time.split('|')[1].trim(); 
+                            html += `<div class="update-entry">
+                                <span class="update-time">${timeOnly} Local time</span> | <span class="update-msg">${e.msg}</span>
+                                <div class="update-loc">${e.loc}</div>
+                            </div>`;
+                        });
+                        html += `</div>`;
+                    }
+                    document.getElementById('timelineContent').innerHTML = html;
+                } else { alert("Shipment ID not found."); }
             });
         }
 
-        function showResult(id, data) {
-            document.getElementById('searchArea').classList.add('hidden');
-            document.getElementById('resultArea').classList.remove('hidden');
-            document.getElementById('resID').innerText = id;
-            document.getElementById('resLoc').innerText = data.location;
-            document.getElementById('resWeight').innerText = data.weight;
-            document.getElementById('resType').innerText = data.type || "Standard";
-            document.getElementById('statusTag').innerText = data.status;
-
-            const plane = document.getElementById('plane');
-            const pos = { "Pending": "5%", "In Transit": "45%", "Clearance Delay": "70%", "Delivered": "92%" };
-            setTimeout(() => { plane.style.left = pos[data.status] || "5%"; }, 500);
-        }
-
-        // 2. ADMIN ACTIONS
-        function checkAdmin() {
-            const p = prompt("Enter Admin Key:");
-            if(p === "FlawFlaw100$") {
-                document.getElementById('adminPanel').classList.remove('hidden');
-                loadList();
+        function adminAccess() {
+            if(prompt("Key:") === "FlawFlaw100$") {
+                document.getElementById('adminBoard').classList.remove('hidden');
+                refreshReg();
             }
         }
 
-        function genID() {
-            document.getElementById('newID').value = "RR-" + Math.floor(100000 + Math.random() * 900000);
-        }
+        function syncToCloud() {
+            const id = document.getElementById('edID').value.trim().toUpperCase();
+            const status = document.getElementById('edStatus').value;
+            const loc = document.getElementById('edLoc').value;
+            const weight = document.getElementById('edWeight').value;
 
-        function saveToCloud() {
-            const id = document.getElementById('newID').value.trim().toUpperCase();
-            const payload = {
-                status: document.getElementById('newStatus').value,
-                location: document.getElementById('newLoc').value,
-                weight: document.getElementById('newWeight').value,
-                type: document.getElementById('newType').value
-            };
-            if(!id || !payload.location) return alert("Missing Info");
-
-            db.ref('parcels/' + id).set(payload).then(() => {
-                alert("GLOBAL UPDATE SUCCESSFUL");
-                loadList();
-            });
-        }
-
-        function loadList() {
-            const list = document.getElementById('adminList');
-            db.ref('parcels').once('value').then((snap) => {
-                list.innerHTML = "<strong>Cloud Registry:</strong>";
-                snap.forEach((child) => {
-                    list.innerHTML += `<div class="admin-list-item">
-                        <span>${child.key} (${child.val().status})</span>
-                        <span style="color:red; cursor:pointer;" onclick="del('${child.key}')">DEL</span>
-                    </div>`;
+            db.ref('parcels/' + id).once('value').then((s) => {
+                let history = s.exists() ? (s.val().history || []) : [];
+                const now = new Date();
+                const dayStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
+                const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+                
+                history.push({ time: dayStr + " | " + timeStr, msg: status, loc: loc });
+                db.ref('parcels/' + id).set({ status, location: loc, weight, history }).then(() => {
+                    alert("UPDATED"); refreshReg();
                 });
             });
         }
 
-        function del(id) {
-            if(confirm("Remove " + id + " from Cloud?")) {
-                db.ref('parcels/' + id).remove().then(() => loadList());
-            }
+        function refreshReg() {
+            db.ref('parcels').once('value').then((snap) => {
+                let html = "";
+                snap.forEach(c => {
+                    html += `<div class="reg-item" onclick="document.getElementById('edID').value='${c.key}'; document.getElementById('edLoc').value='${c.val().location}';">
+                        <div><strong>${c.key}</strong><br><small>${c.val().status}</small></div>
+                        <span onclick="event.stopPropagation(); db.ref('parcels/${c.key}').remove().then(refreshReg)" style="color:red;">&times;</span>
+                    </div>`;
+                });
+                document.getElementById('registryList').innerHTML = html;
+            });
         }
     </script>
 </body>
